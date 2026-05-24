@@ -214,10 +214,11 @@
     #s-camera { background: #fff; }
 
     .cam-topbar {
-      padding-top: calc(env(safe-area-inset-top, 0px) + 8px);
-      padding-bottom: 8px; padding-left: 14px; padding-right: 14px;
-      display: flex; align-items: center; gap: 8px;
-      border-bottom: 1px solid #eef0f3; flex-shrink: 0;
+      padding: calc(env(safe-area-inset-top, 0px) + 16px) 22px 6px;
+      display: flex; align-items: center; flex-shrink: 0;
+    }
+    .cam-topbar-icon {
+      color: #b0b3bb; display: flex; align-items: center; padding: 2px; flex-shrink: 0;
     }
 
     /* QuickToggle pills */
@@ -486,22 +487,27 @@
 
   <!-- Top bar -->
   <div class="cam-topbar">
-    <button id="btn-cam-close" class="icon-circle" aria-label="close">
+    <button id="btn-cam-close" class="cam-topbar-icon" aria-label="close">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
         <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
       </svg>
     </button>
-    <div id="cam-org-name" style="flex:1;text-align:center;font-size:15px;font-weight:700;color:#0c0d12;letter-spacing:-0.005em"></div>
-    <div style="display:flex;align-items:center;gap:6px">
-      <!-- Timer toggle -->
-      <button id="toggle-timer" class="quick-toggle" aria-label="timer">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="13" r="7.5" stroke="currentColor" stroke-width="1.7"/>
-          <path d="M12 9.5V13l2.5 1.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-          <path d="M9 2.5h6M12 2.5v3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px">
+      <span class="org-name" id="cam-org-name"></span>
+      <span class="verified-badge" aria-label="verified">
+        <svg width="9" height="9" viewBox="0 0 24 24" fill="none">
+          <path d="M5 12.5l4 4 10-10" stroke="#fff" stroke-width="2.8"
+                stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-      </button>
+      </span>
     </div>
+    <button id="toggle-timer" class="cam-topbar-icon quick-toggle" aria-label="timer">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="13" r="7.5" stroke="currentColor" stroke-width="1.7"/>
+        <path d="M12 9.5V13l2.5 1.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+        <path d="M9 2.5h6M12 2.5v3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+      </svg>
+    </button>
   </div>
 
   <!-- Viewfinder -->
@@ -756,7 +762,7 @@ function renderLanding(frame) {
   const title = frame.title || '';
   document.getElementById('landing-org-name').textContent = title;
   document.getElementById('landing-title').innerHTML =
-    `Show your support for <strong style="color:#0c0d12">${title}</strong>. Snap a photo, share the message!`;
+    `Support <strong style="color:#1d9bf0">${title}</strong>. Snap a photo, share the message!`;
   document.getElementById('cam-org-name').textContent     = title;
 
   const img = document.getElementById('landing-frame-img');
