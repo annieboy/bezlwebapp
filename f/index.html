@@ -492,12 +492,6 @@
       </svg>
     </button>
     <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
-      <!-- Flash toggle -->
-      <button id="toggle-flash" class="quick-toggle" aria-label="flash">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
-          <path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
-        </svg>
-      </button>
       <!-- Timer toggle -->
       <button id="toggle-timer" class="quick-toggle" aria-label="timer">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
@@ -700,7 +694,6 @@ let frameImg        = null;
 let cameraStream    = null;
 let facingMode      = 'user';
 let activeFilter    = 'none';
-let flash           = 'off';  // off | auto | on
 let timerVal        = 0;      // 0 | 3 | 10
 let gridOn          = false;
 let countdown       = 0;
@@ -807,18 +800,6 @@ function setFilter(id) {
 }
 
 /* ── Camera controls ────────────────────────────────────── */
-function updateFlashUI() {
-  const btn = document.getElementById('toggle-flash');
-  const active = flash !== 'off';
-  btn.classList.toggle('active', active);
-  // Swap icon based on state
-  const icons = {
-    off:  `<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M4 4l16 16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>`,
-    auto: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M11 2L3 13h5l-1 9 8-12h-5l1-8z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><text x="17" y="11" font-size="7" font-weight="700" fill="currentColor" font-family="Inter,sans-serif">A</text></svg>`,
-    on:   `<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>`,
-  };
-  btn.innerHTML = icons[flash] + (flash !== 'off' ? `<span>${flash === 'auto' ? 'Auto' : 'On'}</span>` : '');
-}
 
 function updateTimerUI() {
   const btn = document.getElementById('toggle-timer');
@@ -1028,10 +1009,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-open-app').addEventListener('click', () => openInApp(getFrameId()));
 
   // Camera top controls
-  document.getElementById('toggle-flash').addEventListener('click', () => {
-    flash = flash === 'off' ? 'auto' : flash === 'auto' ? 'on' : 'off';
-    updateFlashUI();
-  });
   document.getElementById('toggle-timer').addEventListener('click', () => {
     timerVal = timerVal === 0 ? 3 : timerVal === 3 ? 10 : 0;
     updateTimerUI();
@@ -1067,8 +1044,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-sc').addEventListener('click', nativeShare);
   document.getElementById('btn-invite').addEventListener('click', handleInvite);
 
-  // Init flash/timer to default state
-  updateFlashUI(); updateTimerUI();
+  updateTimerUI();
 
   init();
 });
