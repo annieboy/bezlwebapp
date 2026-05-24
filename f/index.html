@@ -777,7 +777,7 @@ function renderLanding(frame) {
 
 /* ── Open in app ────────────────────────────────────────── */
 function openInApp(frameId) {
-  window.location.href = `bezl://frame/${frameId}`;
+  window.location.href = `bezl://frame?id=${frameId}`;
   const t = setTimeout(() => window.open(APP_STORE_URL, '_blank', 'noopener'), 2000);
   window.addEventListener('blur', () => clearTimeout(t), { once: true });
   document.addEventListener('visibilitychange', () => {
