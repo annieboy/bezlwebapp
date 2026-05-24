@@ -1081,15 +1081,9 @@ document.addEventListener('DOMContentLoaded', () => {
     showScreen('camera'); await startCamera();
   });
   document.getElementById('btn-more').addEventListener('click', nativeShare);
-  document.getElementById('btn-fb').addEventListener('click', () => {
-    const url = encodeURIComponent(window.location.href);
-    platformShare(() => `https://www.facebook.com/sharer/sharer.php?u=${url}`);
-  });
-  document.getElementById('btn-ig').addEventListener('click', downloadImage);
-  document.getElementById('btn-wa').addEventListener('click', () => {
-    const text = encodeURIComponent((frameData?.title || 'Check this out') + ' ' + window.location.href);
-    platformShare(() => `https://wa.me/?text=${text}`);
-  });
+  document.getElementById('btn-fb').addEventListener('click', nativeShare);
+  document.getElementById('btn-ig').addEventListener('click', nativeShare);
+  document.getElementById('btn-wa').addEventListener('click', nativeShare);
   document.getElementById('btn-sc').addEventListener('click', nativeShare);
   document.getElementById('btn-invite').addEventListener('click', handleInvite);
 
