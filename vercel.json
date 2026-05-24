@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/f/:frameId", "destination": "/f/index.html" }
+  ]
+}

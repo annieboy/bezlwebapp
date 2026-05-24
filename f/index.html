@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0c0d12">
+  <title>BEZL</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    /* ── Reset & base ──────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%; width: 100%;
+      overflow: hidden;
+      background: #0c0d12;
+      color: #fff;
+      font-family: "Inter", -apple-system, system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    button { font-family: inherit; cursor: pointer; border: none; background: none; padding: 0; }
+    img { display: block; max-width: 100%; }
+
+    /* ── Screen system ─────────────────────────────────── */
+    .screen {
+      position: fixed; inset: 0;
+      display: flex; flex-direction: column;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.28s ease;
+      overflow: hidden;
+    }
+    .screen.active { opacity: 1; pointer-events: auto; }
+
+    /* ── Loading ───────────────────────────────────────── */
+    #s-loading {
+      align-items: center; justify-content: center; gap: 24px;
+      background: #0c0d12;
+    }
+    .logo {
+      font-family: "Space Grotesk", system-ui, sans-serif;
+      font-size: 30px; font-weight: 700; letter-spacing: 0.14em; color: #fff;
+    }
+    .logo em { color: #54E6D4; font-style: normal; }
+    .spinner {
+      width: 22px; height: 22px;
+      border: 2.5px solid rgba(255,255,255,0.12);
+      border-top-color: #54E6D4;
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Error ─────────────────────────────────────────── */
+    #s-error {
+      align-items: center; justify-content: center;
+      background: #0c0d12; padding: 32px 24px; text-align: center;
+    }
+    .err-icon {
+      width: 68px; height: 68px; border-radius: 22px;
+      background: rgba(233,73,82,0.14);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 30px; margin: 0 auto 20px;
+    }
+    .err-title {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 22px; font-weight: 700; margin-bottom: 10px;
+    }
+    .err-body {
+      font-size: 14px; color: rgba(255,255,255,0.5);
+      line-height: 1.55; max-width: 280px; margin: 0 auto 32px;
+    }
+
+    /* ── Landing ───────────────────────────────────────── */
+    #s-landing { background: #0c0d12; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    .landing-inner {
+      min-height: 100%;
+      display: flex; flex-direction: column; align-items: center;
+      padding: calc(env(safe-area-inset-top, 20px) + 20px) 24px
+               calc(env(safe-area-inset-bottom, 20px) + 28px);
+      gap: 22px;
+    }
+
+    /* Frame preview card */
+    .frame-card {
+      width: 100%; max-width: 300px;
+      border-radius: 14px; overflow: hidden;
+      box-shadow: 0 32px 64px -24px rgba(0,0,0,0.85),
+                  0 0 0 1px rgba(255,255,255,0.07);
+      position: relative;
+    }
+    .frame-card-photo {
+      width: 100%; aspect-ratio: 4/5; position: relative;
+      background: radial-gradient(120% 90% at 50% 35%, #d6cdb9 0%, #8a8e94 45%, #4b4d56 100%);
+      overflow: hidden;
+    }
+    /* silhouette placeholder */
+    .frame-card-photo::before {
+      content: '';
+      position: absolute; left: 50%; top: 42%;
+      transform: translate(-50%, -50%);
+      width: 42%; aspect-ratio: 1/1.15;
+      border-radius: 50% 50% 48% 48%;
+      background: radial-gradient(60% 60% at 45% 35%,
+        rgba(255,235,210,0.5) 0%, rgba(180,140,100,0.3) 60%, transparent 100%);
+      filter: blur(2px);
+    }
+    .frame-card-photo::after {
+      content: '';
+      position: absolute; bottom: -8%; left: 50%;
+      transform: translateX(-50%);
+      width: 100%; height: 50%;
+      border-radius: 50% 50% 0 0;
+      background: radial-gradient(80% 100% at 50% 0%,
+        rgba(40,40,50,0.55) 0%, rgba(20,20,30,0.85) 60%, rgba(10,10,15,1) 100%);
+    }
+    #landing-frame-img {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: fill; z-index: 2;
+      opacity: 0; transition: opacity 0.35s ease;
+    }
+
+    .frame-title {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 20px; font-weight: 700;
+      text-align: center; letter-spacing: -0.01em;
+      min-height: 28px;
+    }
+
+    /* CTAs */
+    .ctas { width: 100%; max-width: 300px; display: flex; flex-direction: column; gap: 10px; }
+    .btn-primary {
+      width: 100%; padding: 16px; border-radius: 14px;
+      background: #54E6D4; color: #0c0d12;
+      font-size: 15px; font-weight: 700; letter-spacing: -0.01em;
+      text-align: center; transition: transform 0.1s, opacity 0.1s;
+    }
+    .btn-primary:active { transform: scale(0.97); opacity: 0.85; }
+    .btn-secondary {
+      width: 100%; padding: 15px; border-radius: 14px;
+      border: 1.5px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.06); color: #fff;
+      font-size: 15px; font-weight: 600; text-align: center;
+      transition: transform 0.1s, background 0.15s;
+    }
+    .btn-secondary:active { transform: scale(0.97); background: rgba(255,255,255,0.1); }
+    .powered {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+    }
+    .powered strong { color: rgba(255,255,255,0.6); font-weight: 500; }
+
+    /* ── Camera ────────────────────────────────────────── */
+    #s-camera { background: #000; }
+
+    #viewfinder {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      overflow: hidden;
+    }
+    #cam-video {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    #cam-frame {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: fill; pointer-events: none; z-index: 5;
+    }
+    #shutter-flash {
+      position: absolute; inset: 0; background: #fff;
+      opacity: 0; pointer-events: none; z-index: 30;
+      transition: opacity 0.06s;
+    }
+    #shutter-flash.on { opacity: 1; }
+
+    .cam-topbar {
+      position: absolute; top: 0; left: 0; right: 0; z-index: 20;
+      padding: calc(env(safe-area-inset-top, 0px) + 14px) 16px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.55), transparent);
+      pointer-events: none;
+    }
+    .cam-topbar button { pointer-events: auto; }
+    .cam-bottombar {
+      position: absolute; bottom: 0; left: 0; right: 0; z-index: 20;
+      padding: 20px 32px calc(env(safe-area-inset-bottom, 0px) + 28px);
+      display: flex; align-items: center; justify-content: space-between;
+      background: linear-gradient(to top, rgba(0,0,0,0.6), transparent);
+    }
+
+    .icon-btn {
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(255,255,255,0.16);
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; flex-shrink: 0;
+      transition: background 0.15s;
+    }
+    .icon-btn:active { background: rgba(255,255,255,0.28); }
+
+    /* Shutter */
+    .shutter {
+      width: 74px; height: 74px; border-radius: 50%;
+      position: relative; flex-shrink: 0;
+    }
+    .shutter-ring {
+      position: absolute; inset: 0; border-radius: 50%;
+      border: 3px solid #fff;
+    }
+    .shutter-fill {
+      position: absolute; inset: 6px; border-radius: 50%;
+      background: #fff;
+      transition: transform 0.12s ease;
+    }
+    .shutter:active .shutter-fill { transform: scale(0.86); }
+
+    /* ── Preview ───────────────────────────────────────── */
+    #s-preview { background: #f5f5f7; color: #0c0d12; }
+    .preview-topbar {
+      padding: calc(env(safe-area-inset-top, 0px) + 14px) 18px 0;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .preview-topbar-label {
+      font-size: 13px; font-weight: 600; color: #0c0d12;
+    }
+    .icon-btn-dark {
+      width: 32px; height: 32px; border-radius: 50%;
+      background: rgba(12,13,18,0.07);
+      display: flex; align-items: center; justify-content: center;
+      color: #0c0d12; transition: background 0.12s;
+    }
+    .icon-btn-dark:active { background: rgba(12,13,18,0.13); }
+
+    .preview-body {
+      flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+      padding: 14px 20px calc(env(safe-area-inset-bottom, 0px) + 28px);
+      display: flex; flex-direction: column; gap: 22px;
+    }
+
+    .photo-card {
+      width: 100%; border-radius: 14px; overflow: hidden;
+      box-shadow: 0 22px 52px -18px rgba(12,13,18,0.35),
+                  0 4px 12px rgba(12,13,18,0.07);
+    }
+    .photo-card img { width: 100%; display: block; }
+
+    .share-block { display: flex; flex-direction: column; gap: 16px; }
+    .share-heading {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 19px; font-weight: 700;
+      color: #0c0d12; text-align: center;
+      letter-spacing: -0.01em; line-height: 1.25;
+    }
+    .share-heading span { color: #9b9ea6; font-weight: 500; }
+
+    .share-primary-actions { display: flex; flex-direction: column; gap: 10px; }
+    .btn-share {
+      width: 100%; padding: 16px; border-radius: 14px;
+      background: #0c0d12; color: #fff;
+      font-size: 15px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; gap: 9px;
+      transition: opacity 0.1s;
+    }
+    .btn-share:active { opacity: 0.78; }
+    .btn-save {
+      width: 100%; padding: 15px; border-radius: 14px;
+      border: 1.5px solid #e3e4e8; background: #fff;
+      color: #0c0d12; font-size: 14px; font-weight: 600;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: background 0.12s;
+    }
+    .btn-save:active { background: #f0f1f4; }
+
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: #e3e4e8;
+    }
+    .divider span { font-size: 11px; color: #9b9ea6; white-space: nowrap; }
+
+    .platform-row { display: flex; justify-content: center; gap: 14px; }
+    .platform-btn {
+      width: 52px; height: 52px; border-radius: 50%;
+      border: 1.5px solid #e3e4e8; background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.1s;
+    }
+    .platform-btn:active { transform: scale(0.91); }
+
+    .share-footer { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+    .retake-btn {
+      font-size: 13px; color: #9b9ea6; font-weight: 500;
+      padding: 4px 0; transition: color 0.12s;
+    }
+    .retake-btn:hover { color: #0c0d12; }
+    .bezl-nudge { font-size: 13px; color: #9b9ea6; text-align: center; }
+    .bezl-nudge a { color: #0c0d12; font-weight: 600; text-decoration: none; }
+    .powered-dark {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 9px; letter-spacing: 0.22em; text-transform: uppercase;
+      color: rgba(12,13,18,0.3); text-align: center;
+    }
+    .powered-dark strong { color: rgba(12,13,18,0.6); font-weight: 500; }
+  </style>
+</head>
+<body>
+
+<!-- ══ LOADING ══════════════════════════════════════════ -->
+<div id="s-loading" class="screen active">
+  <div class="logo">BEZ<em>L</em></div>
+  <div class="spinner"></div>
+</div>
+
+<!-- ══ ERROR ════════════════════════════════════════════ -->
+<div id="s-error" class="screen">
+  <div class="err-icon" id="err-icon">🔒</div>
+  <div class="err-title" id="err-title">Frame not found</div>
+  <p class="err-body" id="err-body">This frame doesn't exist or the link has expired.</p>
+  <button class="btn-primary" style="max-width:280px;width:100%"
+          onclick="window.open('https://apps.apple.com/us/app/bezl/id6763313319','_blank','noopener')">
+    Get BEZL for iOS →
+  </button>
+</div>
+
+<!-- ══ LANDING ══════════════════════════════════════════ -->
+<div id="s-landing" class="screen">
+  <div class="landing-inner">
+    <div class="logo">BEZ<em>L</em></div>
+
+    <div class="frame-card">
+      <div class="frame-card-photo">
+        <img id="landing-frame-img" src="" alt="">
+      </div>
+    </div>
+
+    <div class="frame-title" id="landing-title"></div>
+
+    <div class="ctas">
+      <button id="btn-use-web" class="btn-primary">📸&nbsp;&nbsp;Use Web Camera</button>
+      <button id="btn-open-app" class="btn-secondary">Open in BEZL App</button>
+    </div>
+
+    <p class="powered">POWERED BY <strong>BEZL</strong></p>
+  </div>
+</div>
+
+<!-- ══ CAMERA ═══════════════════════════════════════════ -->
+<div id="s-camera" class="screen">
+  <div id="shutter-flash"></div>
+
+  <div class="cam-topbar">
+    <button id="btn-cam-back" class="icon-btn" aria-label="Back">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2.2"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <div id="viewfinder">
+    <video id="cam-video" autoplay playsinline muted></video>
+    <img id="cam-frame" src="" alt="">
+  </div>
+
+  <div class="cam-bottombar">
+    <div style="width:44px"></div><!-- balance -->
+    <button id="btn-shutter" class="shutter" aria-label="Take photo">
+      <div class="shutter-ring"></div>
+      <div class="shutter-fill"></div>
+    </button>
+    <button id="btn-flip" class="icon-btn" aria-label="Flip camera">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M4 9a8 8 0 0114-4l2-1M20 15a8 8 0 01-14 4l-2 1"
+              stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M20 4v4h-4M4 20v-4h4"
+              stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+<!-- ══ PREVIEW ══════════════════════════════════════════ -->
+<div id="s-preview" class="screen">
+  <div class="preview-topbar">
+    <button id="btn-retake" class="icon-btn-dark" aria-label="Retake">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+        <path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2.2"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <span class="preview-topbar-label">Preview</span>
+    <div style="width:32px"></div>
+  </div>
+
+  <div class="preview-body">
+    <div class="photo-card">
+      <img id="preview-img" src="" alt="Your photo with frame">
+    </div>
+
+    <div class="share-block">
+      <div class="share-heading">
+        Almost done.&nbsp;<span>Now share it.</span>
+      </div>
+
+      <div class="share-primary-actions">
+        <button id="btn-share" class="btn-share">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M12 4l4 4M12 4l-4 4M12 4v12"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M5 13v5a2 2 0 002 2h10a2 2 0 002-2v-5"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          Share
+        </button>
+        <button id="btn-save" class="btn-save">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
+            <path d="M12 4v12m0 0l-4-4m4 4l4-4M5 20h14"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Save to Photos
+        </button>
+      </div>
+
+      <div class="divider"><span>or share directly</span></div>
+
+      <div class="platform-row">
+        <button class="platform-btn" id="btn-instagram" aria-label="Instagram">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <rect x="3" y="3" width="18" height="18" rx="5" stroke="#E1306C" stroke-width="1.8"/>
+            <circle cx="12" cy="12" r="4" stroke="#E1306C" stroke-width="1.8"/>
+            <circle cx="17.5" cy="6.5" r="1" fill="#E1306C"/>
+          </svg>
+        </button>
+        <button class="platform-btn" id="btn-whatsapp" aria-label="WhatsApp">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="#25D366">
+            <path d="M12 2a10 10 0 00-8.5 15.2L2 22l5-1.4A10 10 0 1012 2zm5.1 14.3c-.2.6-1.2 1.2-1.7 1.3-.5.1-1 .1-1.7-.1-.4-.1-1-.3-1.6-.6a11.3 11.3 0 01-4.4-3.9c-.3-.5-.9-1.4-.9-2.7s.7-1.9 1-2.1c.2-.2.5-.3.7-.3h.5c.2 0 .4 0 .6.4l.7 1.7c.1.2.1.4 0 .5l-.3.4-.3.3c-.1.1-.2.2-.1.5.2.3.7 1.1 1.4 1.8.9.8 1.7 1.1 2 1.2.2.1.4.1.5-.1l.6-.7c.2-.2.3-.2.5-.1l1.6.8c.2.1.4.2.4.3.1.1.1.6-.1 1.3z"/>
+          </svg>
+        </button>
+        <button class="platform-btn" id="btn-twitter" aria-label="X / Twitter">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="#000">
+            <path d="M17.5 3h3.2l-7 8 8.2 10h-6.4l-5-6.5L4.7 21H1.5l7.5-8.6L1.2 3h6.6l4.5 6 5.2-6zm-1.1 16h1.8L7.7 4.9H5.7l10.7 14.1z"/>
+          </svg>
+        </button>
+        <button class="platform-btn" id="btn-facebook" aria-label="Facebook">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="#1877F2">
+            <path d="M14.6 22v-9h2.8l.5-3.6h-3.3V7.3c0-1 .3-1.7 1.8-1.7H18V2.4a26 26 0 00-2.8-.2c-2.8 0-4.7 1.7-4.7 4.8v2.4H7.5V13h2.9V22h4.1z"/>
+          </svg>
+        </button>
+        <button class="platform-btn" id="btn-more" aria-label="More">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <circle cx="6" cy="12" r="2" fill="#54565e"/>
+            <circle cx="12" cy="12" r="2" fill="#54565e"/>
+            <circle cx="18" cy="12" r="2" fill="#54565e"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="share-footer">
+        <button class="retake-btn" id="btn-retake-text">← Retake</button>
+        <p class="bezl-nudge">
+          Want more frames?&nbsp;
+          <a href="https://apps.apple.com/us/app/bezl/id6763313319"
+             target="_blank" rel="noopener noreferrer">Download BEZL →</a>
+        </p>
+        <p class="powered-dark">POWERED BY <strong>BEZL</strong></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Off-screen composite canvas -->
+<canvas id="compose-canvas" style="display:none"></canvas>
+
+<script>
+'use strict';
+
+/* ── Config ──────────────────────────────────────────── */
+const SUPABASE_URL     = 'https://afalcwqssrhxgvvnnass.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_2GMxETOSQixv8RWqhiiayw_D4WfCOY_';
+const APP_STORE_URL    = 'https://apps.apple.com/us/app/bezl/id6763313319';
+
+/* ── State ───────────────────────────────────────────── */
+let frameData      = null;   // PublicWebFrame from RPC
+let frameImg       = null;   // preloaded HTMLImageElement for compositing
+let cameraStream   = null;
+let facingMode     = 'user';
+let compositeDataUrl = null;
+
+/* ── Supabase ────────────────────────────────────────── */
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* ── URL parsing ─────────────────────────────────────── */
+function getFrameId() {
+  const m = window.location.pathname.match(/\/f\/([^/?#]+)/);
+  return m ? decodeURIComponent(m[1]) : null;
+}
+
+/* ── Screen manager ──────────────────────────────────── */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+  document.getElementById('s-' + id).classList.add('active');
+}
+
+/* ── Error helper ────────────────────────────────────── */
+function showError(title, body, icon = '🔒') {
+  document.getElementById('err-icon').textContent  = icon;
+  document.getElementById('err-title').textContent = title;
+  document.getElementById('err-body').textContent  = body;
+  showScreen('error');
+}
+
+/* ── Fetch frame via RPC (no direct table access) ─────── */
+async function fetchFrame(frameId) {
+  const { data, error } = await sb.rpc('get_public_web_frame', { frame_id: frameId });
+  const frame = Array.isArray(data) ? data[0] : data;
+
+  if (error || !frame) {
+    showError(
+      'Frame not found',
+      "This frame doesn't exist or has been made private.",
+      '🔍'
+    );
+    return null;
+  }
+
+  if (frame.public_expires_at && new Date(frame.public_expires_at) < new Date()) {
+    showError(
+      'This frame has expired',
+      'The link for this frame is no longer active. Download BEZL to discover more frames.',
+      '⏰'
+    );
+    return null;
+  }
+
+  return frame;
+}
+
+/* ── Preload frame image for compositing ─────────────── */
+function loadImage(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous'; // required for canvas toDataURL
+    img.onload  = () => resolve(img);
+    img.onerror = () => reject(new Error('Frame image failed to load'));
+    img.src = url;
+  });
+}
+
+/* ── Landing ─────────────────────────────────────────── */
+function renderLanding(frame) {
+  document.getElementById('landing-title').textContent = frame.title || '';
+
+  const img = document.getElementById('landing-frame-img');
+  img.src = frame.image_url;
+  img.onload = () => { img.style.opacity = '1'; };
+
+  document.getElementById('cam-frame').src = frame.image_url;
+
+  showScreen('landing');
+}
+
+/* ── Open in app (smart deep-link with App Store fallback) */
+function openInApp(frameId) {
+  const deepLink = `bezl://frame/${frameId}`;
+  window.location.href = deepLink;
+
+  // If the app isn't installed the browser stays on this page.
+  // Redirect to the App Store after 2 s.
+  const timer = setTimeout(() => {
+    window.open(APP_STORE_URL, '_blank', 'noopener,noreferrer');
+  }, 2000);
+
+  // Cancel if the page loses focus — app opened successfully.
+  const cancel = () => clearTimeout(timer);
+  window.addEventListener('blur', cancel, { once: true });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) clearTimeout(timer);
+  }, { once: true });
+}
+
+/* ── Camera ──────────────────────────────────────────── */
+async function startCamera() {
+  try {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(t => t.stop());
+      cameraStream = null;
+    }
+
+    cameraStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode, width: { ideal: 1920 }, height: { ideal: 1440 } },
+      audio: false,
+    });
+
+    const video = document.getElementById('cam-video');
+    video.srcObject = cameraStream;
+    // Mirror front-camera preview so it feels like a natural mirror
+    video.style.transform = facingMode === 'user' ? 'scaleX(-1)' : 'none';
+
+    await new Promise(res => video.addEventListener('loadedmetadata', res, { once: true }));
+    await video.play();
+
+    sizeViewfinder();
+    return true;
+  } catch (err) {
+    stopCamera();
+    const msgs = {
+      NotAllowedError:  ['Camera access denied',
+                         'Allow camera access in your browser settings to take a photo.', '📷'],
+      NotFoundError:    ['No camera found',
+                         "We couldn't find a camera on your device.", '📷'],
+    };
+    const [title, body, icon] = msgs[err.name] || ['Camera error',
+      'Something went wrong. Please try again.', '⚠️'];
+    showError(title, body, icon);
+    return false;
+  }
+}
+
+function stopCamera() {
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(t => t.stop());
+    cameraStream = null;
+  }
+}
+
+function sizeViewfinder() {
+  if (!frameImg) return;
+  const aspect = frameImg.naturalWidth / frameImg.naturalHeight;
+  const sw = window.innerWidth, sh = window.innerHeight;
+  const vf = document.getElementById('viewfinder');
+
+  let w, h;
+  if (sw / sh <= aspect) { w = sw; h = sw / aspect; }
+  else                   { h = sh; w = sh * aspect; }
+
+  vf.style.width  = w + 'px';
+  vf.style.height = h + 'px';
+}
+
+/* ── Capture & composite ─────────────────────────────── */
+async function capture() {
+  const video = document.getElementById('cam-video');
+
+  // Shutter flash
+  const flash = document.getElementById('shutter-flash');
+  flash.classList.add('on');
+  await new Promise(r => setTimeout(r, 120));
+  flash.classList.remove('on');
+
+  const canvas = document.getElementById('compose-canvas');
+  const fw = frameImg.naturalWidth;
+  const fh = frameImg.naturalHeight;
+  canvas.width  = fw;
+  canvas.height = fh;
+  const ctx = canvas.getContext('2d');
+
+  // Scale video to cover the frame dimensions (object-fit:cover equivalent)
+  const vw = video.videoWidth, vh = video.videoHeight;
+  const frameAspect = fw / fh;
+  const videoAspect = vw / vh;
+  let sx = 0, sy = 0, sw = vw, sh = vh;
+  if (videoAspect > frameAspect) { sw = vh * frameAspect; sx = (vw - sw) / 2; }
+  else                           { sh = vw / frameAspect; sy = (vh - sh) / 2; }
+
+  // Front camera: flip horizontally so the saved image matches the preview mirror
+  if (facingMode === 'user') {
+    ctx.save();
+    ctx.translate(fw, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(video, sx, sy, sw, sh, 0, 0, fw, fh);
+    ctx.restore();
+  } else {
+    ctx.drawImage(video, sx, sy, sw, sh, 0, 0, fw, fh);
+  }
+
+  // Composite the frame overlay on top
+  ctx.drawImage(frameImg, 0, 0, fw, fh);
+
+  try {
+    compositeDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+  } catch (e) {
+    // Canvas tainted — Supabase Storage bucket may need CORS headers for this origin
+    showError('Sharing unavailable',
+      'The frame image could not be composited due to a security restriction. '
+      + 'Please ensure the Supabase Storage bucket has CORS configured for this domain.', '⚠️');
+    return;
+  }
+
+  stopCamera();
+  document.getElementById('preview-img').src = compositeDataUrl;
+  showScreen('preview');
+}
+
+/* ── Share / download ────────────────────────────────── */
+async function nativeShare() {
+  try {
+    const res  = await fetch(compositeDataUrl);
+    const blob = await res.blob();
+    const file = new File([blob], 'bezl-frame.jpg', { type: 'image/jpeg' });
+
+    if (navigator.canShare?.({ files: [file] })) {
+      await navigator.share({
+        title: frameData.title || 'My BEZL Frame',
+        text:  'Check this out — made with BEZL!',
+        files: [file],
+      });
+      return;
+    }
+
+    if (navigator.share) {
+      await navigator.share({
+        title: frameData.title || 'My BEZL Frame',
+        url:   window.location.href,
+      });
+      return;
+    }
+  } catch (e) {
+    if (e.name === 'AbortError') return;
+  }
+  // Fallback
+  downloadImage();
+}
+
+function downloadImage() {
+  const a = document.createElement('a');
+  a.href     = compositeDataUrl;
+  a.download = `bezl-${frameData?.id || 'frame'}.jpg`;
+  a.click();
+}
+
+// Platform share helpers — save image first, then open platform
+function platformShare(urlFn) {
+  downloadImage();
+  setTimeout(() => window.open(urlFn(), '_blank', 'noopener,noreferrer'), 400);
+}
+
+function shareWhatsApp() {
+  const text = encodeURIComponent(
+    (frameData?.title ? frameData.title + ' — ' : '') + window.location.href
+  );
+  platformShare(() => `https://wa.me/?text=${text}`);
+}
+
+function shareTwitter() {
+  const text = encodeURIComponent(frameData?.title || 'Check out this BEZL frame!');
+  const url  = encodeURIComponent(window.location.href);
+  platformShare(() => `https://twitter.com/intent/tweet?text=${text}&url=${url}`);
+}
+
+function shareFacebook() {
+  const url = encodeURIComponent(window.location.href);
+  platformShare(() => `https://www.facebook.com/sharer/sharer.php?u=${url}`);
+}
+
+// Instagram doesn't support web → direct image share; download + guide user
+function shareInstagram() { downloadImage(); }
+
+/* ── Retake ──────────────────────────────────────────── */
+async function retake() {
+  showScreen('camera');
+  await startCamera();
+}
+
+/* ── Init ────────────────────────────────────────────── */
+async function init() {
+  const frameId = getFrameId();
+
+  if (!frameId) {
+    showError('No frame selected', 'Scan a BEZL QR code to open a frame.', '📷');
+    return;
+  }
+
+  frameData = await fetchFrame(frameId);
+  if (!frameData) return;
+
+  try {
+    frameImg = await loadImage(frameData.image_url);
+  } catch {
+    showError('Image failed to load', 'Check your connection and try again.', '🖼️');
+    return;
+  }
+
+  renderLanding(frameData);
+}
+
+/* ── Wire up events ──────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  // Landing
+  document.getElementById('btn-use-web').addEventListener('click', async () => {
+    showScreen('camera');
+    await startCamera();
+  });
+  document.getElementById('btn-open-app').addEventListener('click', () => {
+    openInApp(getFrameId());
+  });
+
+  // Camera
+  document.getElementById('btn-cam-back').addEventListener('click', () => {
+    stopCamera(); showScreen('landing');
+  });
+  document.getElementById('btn-shutter').addEventListener('click', capture);
+  document.getElementById('btn-flip').addEventListener('click', async () => {
+    facingMode = facingMode === 'user' ? 'environment' : 'user';
+    await startCamera();
+  });
+
+  // Preview
+  document.getElementById('btn-retake').addEventListener('click', retake);
+  document.getElementById('btn-retake-text').addEventListener('click', retake);
+  document.getElementById('btn-share').addEventListener('click', nativeShare);
+  document.getElementById('btn-save').addEventListener('click', downloadImage);
+  document.getElementById('btn-instagram').addEventListener('click', shareInstagram);
+  document.getElementById('btn-whatsapp').addEventListener('click', shareWhatsApp);
+  document.getElementById('btn-twitter').addEventListener('click', shareTwitter);
+  document.getElementById('btn-facebook').addEventListener('click', shareFacebook);
+  document.getElementById('btn-more').addEventListener('click', nativeShare);
+
+  // Recompute viewfinder on orientation change
+  window.addEventListener('resize', sizeViewfinder);
+
+  init();
+});
+</script>
+</body>
+</html>
