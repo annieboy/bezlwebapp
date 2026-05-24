@@ -238,15 +238,14 @@
 
     /* Viewfinder */
     .cam-viewfinder-wrap {
-      flex: 1; min-height: 0;
       display: flex; align-items: flex-start; justify-content: center;
-      padding: 0 12px; background: #fff; overflow: hidden;
+      padding: 0 22px; background: #fff; flex-shrink: 0;
     }
     #viewfinder {
-      height: 100%; max-height: 100%;
-      aspect-ratio: 4/5; width: auto; max-width: 100%;
+      width: 100%; aspect-ratio: 4/5;
       position: relative; background: #0c0d12;
-      overflow: hidden; border-radius: 6px;
+      overflow: hidden; border-radius: 4px;
+      box-shadow: 0 18px 40px -16px rgba(12,13,18,0.25), 0 2px 6px rgba(12,13,18,0.08);
     }
     #cam-video {
       position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
@@ -348,8 +347,8 @@
     }
     .photo-hero-card {
       width: 100%; aspect-ratio: 4/5; position: relative;
-      background: #0c0d12; overflow: hidden; border-radius: 6px;
-      box-shadow: 0 22px 44px -18px rgba(12,13,18,0.35), 0 4px 10px rgba(12,13,18,0.06);
+      background: #0c0d12; overflow: hidden; border-radius: 4px;
+      box-shadow: 0 18px 40px -16px rgba(12,13,18,0.25), 0 2px 6px rgba(12,13,18,0.08);
     }
     .photo-hero-card img {
       position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
@@ -491,7 +490,8 @@
         <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
       </svg>
     </button>
-    <div style="margin-left:auto;display:flex;align-items:center;gap:6px">
+    <div id="cam-org-name" style="flex:1;text-align:center;font-size:15px;font-weight:700;color:#0c0d12;letter-spacing:-0.005em"></div>
+    <div style="display:flex;align-items:center;gap:6px">
       <!-- Timer toggle -->
       <button id="toggle-timer" class="quick-toggle" aria-label="timer">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
@@ -754,6 +754,7 @@ function renderLanding(frame) {
   const title = frame.title || '';
   document.getElementById('landing-org-name').textContent = title;
   document.getElementById('landing-title').textContent    = title;
+  document.getElementById('cam-org-name').textContent     = title;
 
   const img = document.getElementById('landing-frame-img');
   img.src = frame.image_url;
