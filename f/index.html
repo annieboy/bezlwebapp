@@ -450,7 +450,7 @@
     <!-- Campaign info -->
     <div class="campaign-info" style="flex:1;display:flex;flex-direction:column;gap:12px;align-items:center">
       <div>
-        <h1 class="campaign-headline display" id="landing-title"></h1>
+        <p id="landing-title" style="font-size:13px;color:#54565e;line-height:1.5;text-align:center;margin:0"></p>
       </div>
 
       <!-- Stats row (shown only when data available) -->
@@ -473,7 +473,8 @@
           Use Instantly
         </button>
         <button id="btn-open-app" class="btn-secondary">Open in BEZL App</button>
-        <div class="powered-bezl" style="margin-top:6px">POWERED BY <strong>BEZL</strong></div>
+        <a href="https://bezlapp.com/" target="_blank" rel="noopener"
+           class="powered-bezl" style="margin-top:6px;text-decoration:none">POWERED BY <strong>BEZL</strong></a>
       </div>
     </div>
 
@@ -753,7 +754,8 @@ function loadImage(url) {
 function renderLanding(frame) {
   const title = frame.title || '';
   document.getElementById('landing-org-name').textContent = title;
-  document.getElementById('landing-title').textContent    = title;
+  document.getElementById('landing-title').innerHTML =
+    `Show your support <strong style="color:#0c0d12">${title}</strong>. Snap a photo, share the message!`;
   document.getElementById('cam-org-name').textContent     = title;
 
   const img = document.getElementById('landing-frame-img');
