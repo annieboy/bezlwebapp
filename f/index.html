@@ -799,6 +799,27 @@ function loadImage(url) {
 }
 
 /* ── Landing ────────────────────────────────────────────── */
+function frameBackdropColor(img) {
+  try {
+    const c = document.createElement('canvas');
+    c.width = c.height = 80;
+    const ctx = c.getContext('2d');
+    ctx.drawImage(img, 0, 0, 80, 80);
+    const d = ctx.getImageData(0, 0, 80, 80).data;
+    let r = 0, g = 0, b = 0, n = 0;
+    for (let i = 0; i < d.length; i += 4) {
+      if (d[i + 3] < 128) continue;
+      r += d[i]; g += d[i + 1]; b += d[i + 2]; n++;
+    }
+    if (!n) return null;
+    // Mix 12% colour + 88% white → soft pastel
+    r = Math.round(r / n * 0.12 + 255 * 0.88);
+    g = Math.round(g / n * 0.12 + 255 * 0.88);
+    b = Math.round(b / n * 0.12 + 255 * 0.88);
+    return `rgb(${r},${g},${b})`;
+  } catch { return null; }
+}
+
 function renderLanding(frame) {
   const title = frame.title || '';
   document.getElementById('landing-org-name').textContent = title;
@@ -813,7 +834,11 @@ function renderLanding(frame) {
 
   const img = document.getElementById('landing-frame-img');
   img.src = frame.image_url;
-  img.onload = () => { img.style.opacity = '1'; };
+  img.onload = () => {
+    img.style.opacity = '1';
+    const bg = frameBackdropColor(frameImg);
+    if (bg) document.querySelector('.frame-card-photo-bg').style.background = bg;
+  };
 
   document.getElementById('cam-frame-overlay').src = frame.image_url;
   showScreen('landing');
