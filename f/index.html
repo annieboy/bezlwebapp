@@ -8,6 +8,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0c0d12">
   <title>BEZL</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://afalcwqssrhxgvvnnass.supabase.co; connect-src https://afalcwqssrhxgvvnnass.supabase.co; frame-ancestors 'none';">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -487,13 +488,13 @@
           Take instant photo
         </button>
         <button id="btn-open-app" class="btn-secondary">Open in BEZL App</button>
-        <a href="https://bezlapp.com/" target="_blank" rel="noopener"
+        <a href="https://bezlapp.com/" target="_blank" rel="noopener noreferrer"
            class="powered-bezl" style="margin-top:6px;text-decoration:none">POWERED BY <strong style="color:#5A43FE">BEZL</strong></a>
         <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:6px">
-          <a href="https://bezlapp.com/terms" target="_blank" rel="noopener"
+          <a href="https://bezlapp.com/terms" target="_blank" rel="noopener noreferrer"
              style="font-size:10px;color:#9b9ea6;text-decoration:none;letter-spacing:0.01em">Terms</a>
           <span style="font-size:10px;color:#d0d2d8">·</span>
-          <a href="https://bezlapp.com/privacy" target="_blank" rel="noopener"
+          <a href="https://bezlapp.com/privacy" target="_blank" rel="noopener noreferrer"
              style="font-size:10px;color:#9b9ea6;text-decoration:none;letter-spacing:0.01em">Privacy</a>
         </div>
       </div>
@@ -747,7 +748,9 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 /* ── Helpers ────────────────────────────────────────────── */
 function getFrameId() {
   const m = window.location.pathname.match(/\/f\/([^/?#]+)/);
-  return m ? decodeURIComponent(m[1]) : null;
+  if (!m) return null;
+  const id = decodeURIComponent(m[1]);
+  return /^[a-zA-Z0-9_-]{1,128}$/.test(id) ? id : null;
 }
 
 function showScreen(id) {
@@ -793,8 +796,12 @@ function loadImage(url) {
 function renderLanding(frame) {
   const title = frame.title || '';
   document.getElementById('landing-org-name').textContent = title;
-  document.getElementById('landing-title').innerHTML =
-    `Support <strong style="color:#1d9bf0">${title}</strong>. Snap a photo, share the message!`;
+  const _lt = document.getElementById('landing-title');
+  _lt.textContent = '';
+  const _strong = document.createElement('strong');
+  _strong.style.color = '#1d9bf0';
+  _strong.textContent = title;
+  _lt.append('Support ', _strong, '. Snap a photo, share the message!');
   document.getElementById('cam-org-name').textContent     = title;
   document.getElementById('preview-org-name').textContent = title;
 
@@ -1082,6 +1089,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const file = e.target.files[0];
     e.target.value = '';
     if (!file) return;
+    if (file.size > 25 * 1024 * 1024) {
+      showError('Image too large', 'Please choose an image under 25 MB.', '🖼️'); return;
+    }
 
     const img = new Image();
     img.onload = () => {
