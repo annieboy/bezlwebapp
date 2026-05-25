@@ -250,7 +250,7 @@
       box-shadow: 0 18px 40px -16px rgba(12,13,18,0.25), 0 2px 6px rgba(12,13,18,0.08);
     }
     #cam-video {
-      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #0c0d12;
     }
     #cam-frame-overlay {
       position: absolute; inset: 0; width: 100%; height: 100%;
@@ -875,17 +875,7 @@ async function startCamera() {
     if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
 
     cameraStream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode,
-        width:  { ideal: 1080 },
-        height: { ideal: 1350 },
-        aspectRatio: { ideal: 0.8 },
-        advanced: [
-          { exposureMode: 'continuous' },
-          { focusMode: 'continuous' },
-          { whiteBalanceMode: 'continuous' },
-        ],
-      },
+      video: { facingMode },
       audio: false,
     });
 
