@@ -157,7 +157,9 @@
     }
     .frame-card-photo-bg {
       position: absolute; inset: 0; overflow: hidden;
-      background: linear-gradient(160deg, #ede9fe 0%, #c4b5fd 100%);
+      background: #e4e5e9;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 10px;
     }
     .frame-card-photo-bg::before { content: none; }
     .frame-card-photo-bg::after  { content: none; }
@@ -446,30 +448,11 @@
     <!-- Frame preview card -->
     <div class="frame-card">
       <div class="frame-card-photo-bg">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 375"
-             preserveAspectRatio="xMidYMid slice"
-             style="position:absolute;inset:0;width:100%;height:100%">
-          <defs>
-            <linearGradient id="ph-bg" x1="0" y1="0" x2="0.3" y2="1">
-              <stop offset="0%" stop-color="#ede9fe"/>
-              <stop offset="100%" stop-color="#a78bfa"/>
-            </linearGradient>
-          </defs>
-          <rect width="300" height="375" fill="url(#ph-bg)"/>
-          <!-- head -->
-          <circle cx="150" cy="138" r="62" fill="rgba(109,40,217,0.18)"/>
-          <!-- shoulders -->
-          <ellipse cx="150" cy="395" rx="148" ry="118" fill="rgba(109,40,217,0.18)"/>
-          <!-- camera hint icon -->
-          <g transform="translate(150,230)" opacity="0.45">
-            <rect x="-22" y="-16" width="44" height="32" rx="6" fill="none" stroke="#7c3aed" stroke-width="2"/>
-            <circle cx="0" cy="0" r="8" fill="none" stroke="#7c3aed" stroke-width="2"/>
-            <rect x="-6" y="-22" width="12" height="7" rx="2" fill="#7c3aed"/>
-          </g>
-          <text x="150" y="275" text-anchor="middle"
-                font-family="Inter,system-ui,sans-serif" font-size="11"
-                fill="#7c3aed" opacity="0.6" letter-spacing="0.05em">YOUR PHOTO HERE</text>
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" style="color:#9b9ea6">
+          <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2v11z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+          <circle cx="12" cy="13" r="4" stroke="currentColor" stroke-width="1.5"/>
         </svg>
+        <span style="font-size:11px;color:#9b9ea6;letter-spacing:0.04em;font-weight:500">YOUR PHOTO HERE</span>
       </div>
       <img id="landing-frame-img" class="frame-overlay-img" src="" alt="">
     </div>
