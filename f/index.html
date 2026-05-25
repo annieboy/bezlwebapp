@@ -1005,23 +1005,29 @@ function startCountdown(n) {
 }
 
 /* ── Share ──────────────────────────────────────────────── */
+function dataUrlToBlob(dataUrl) {
+  const [header, b64] = dataUrl.split(',');
+  const mime = header.match(/:(.*?);/)[1];
+  const bytes = atob(b64);
+  const arr = new Uint8Array(bytes.length);
+  for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+  return new Blob([arr], { type: mime });
+}
+
 async function nativeShare() {
+  if (!navigator.share) { downloadImage(); return; }
   try {
-    const res  = await fetch(compositeDataUrl);
-    const blob = await res.blob();
+    // Convert synchronously — avoids losing iOS Safari user-gesture context
+    const blob = dataUrlToBlob(compositeDataUrl);
     const file = new File([blob], 'bezl-frame.jpg', { type: 'image/jpeg' });
     if (navigator.canShare?.({ files: [file] })) {
       await navigator.share({ title: frameData?.title || 'My BEZL Frame',
         text: 'Check this out — made with BEZL!', files: [file] });
-      return;
-    }
-    if (navigator.share) {
+    } else {
       await navigator.share({ title: frameData?.title || 'My BEZL Frame',
         url: window.location.href });
-      return;
     }
-  } catch (e) { if (e.name === 'AbortError') return; }
-  downloadImage();
+  } catch (e) { if (e.name !== 'AbortError') downloadImage(); }
 }
 
 function downloadImage() {
