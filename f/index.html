@@ -993,12 +993,13 @@ async function nativeShare() {
     // Convert synchronously — avoids losing iOS Safari user-gesture context
     const blob = dataUrlToBlob(compositeDataUrl);
     const file = new File([blob], 'bezl-frame.jpg', { type: 'image/jpeg' });
+    const tag = '#' + (frameData?.title || 'BEZL').replace(/\s+/g, '') + ' #BEZL';
     if (navigator.canShare?.({ files: [file] })) {
       await navigator.share({ title: frameData?.title || 'My BEZL Frame',
-        text: 'Check this out — made with BEZL!', files: [file] });
+        text: tag, files: [file] });
     } else {
       await navigator.share({ title: frameData?.title || 'My BEZL Frame',
-        url: window.location.href });
+        text: tag, url: window.location.href });
     }
   } catch (e) { if (e.name !== 'AbortError') downloadImage(); }
 }
