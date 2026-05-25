@@ -875,18 +875,7 @@ async function startCamera() {
     if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
 
     cameraStream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        facingMode,
-        width:  { ideal: 3840 },
-        height: { ideal: 2160 },
-        advanced: [
-          { exposureMode: 'continuous' },
-          { focusMode: 'continuous' },
-          { whiteBalanceMode: 'continuous' },
-          { noiseReduction: false },
-          { sharpness: 100 },
-        ],
-      },
+      video: { facingMode },
       audio: false,
     });
 
