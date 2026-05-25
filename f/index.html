@@ -251,7 +251,6 @@
     }
     #cam-video {
       position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
-      transform: scale(0.82); transform-origin: center;
     }
     #cam-frame-overlay {
       position: absolute; inset: 0; width: 100%; height: 100%;
@@ -876,7 +875,18 @@ async function startCamera() {
     if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
 
     cameraStream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode },
+      video: {
+        facingMode,
+        width:  { ideal: 3840 },
+        height: { ideal: 2160 },
+        advanced: [
+          { exposureMode: 'continuous' },
+          { focusMode: 'continuous' },
+          { whiteBalanceMode: 'continuous' },
+          { noiseReduction: false },
+          { sharpness: 100 },
+        ],
+      },
       audio: false,
     });
 
@@ -927,15 +937,12 @@ function doCapture() {
     const filterCss = FILTERS.find(f => f.id === activeFilter)?.css || 'none';
     ctx.filter = filterCss;
 
-    const zoomOut = 0.82;
-    const dw = fw * zoomOut, dh = fh * zoomOut;
-    const dx = (fw - dw) / 2,  dy = (fh - dh) / 2;
     if (facingMode === 'user') {
       ctx.save(); ctx.translate(fw, 0); ctx.scale(-1, 1);
-      ctx.drawImage(video, sx, sy, sw, sh, fw - dx - dw, dy, dw, dh);
+      ctx.drawImage(video, sx, sy, sw, sh, 0, 0, fw, fh);
       ctx.restore();
     } else {
-      ctx.drawImage(video, sx, sy, sw, sh, dx, dy, dw, dh);
+      ctx.drawImage(video, sx, sy, sw, sh, 0, 0, fw, fh);
     }
 
     ctx.filter = 'none';
