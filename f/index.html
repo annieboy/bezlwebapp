@@ -877,14 +877,13 @@ async function startCamera() {
     cameraStream = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode,
-        width:  { ideal: 3840 },
-        height: { ideal: 2160 },
+        width:  { ideal: 1080 },
+        height: { ideal: 1350 },
+        aspectRatio: { ideal: 0.8 },
         advanced: [
           { exposureMode: 'continuous' },
           { focusMode: 'continuous' },
           { whiteBalanceMode: 'continuous' },
-          { noiseReduction: false },
-          { sharpness: 100 },
         ],
       },
       audio: false,
