@@ -19,7 +19,7 @@
     html, body {
       height: 100%; width: 100%; overflow: hidden;
       font-family: "Inter", -apple-system, system-ui, sans-serif;
-      background: #ecedf0; color: #0c0d12;
+      background: #1a1a2e; color: #0c0d12;
       -webkit-font-smoothing: antialiased;
       -webkit-text-size-adjust: 100%;
     }
@@ -28,9 +28,25 @@
     .display { font-family: "Space Grotesk", "Inter", system-ui, sans-serif; }
     .mono    { font-family: "JetBrains Mono", ui-monospace, monospace; }
 
+    /* ── Phone shell on desktop ───────────────────────────── */
+    #app-shell {
+      position: fixed; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #app-frame {
+      position: relative;
+      width: 100%; height: 100%;
+      max-width: 430px; max-height: 932px;
+      overflow: hidden;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+    }
+    @media (min-width: 500px) {
+      #app-frame { border-radius: 44px; }
+    }
+
     /* ── Screen system ────────────────────────────────────── */
     .screen {
-      position: fixed; inset: 0;
+      position: absolute; inset: 0;
       display: flex; flex-direction: column;
       opacity: 0; pointer-events: none;
       transition: opacity 0.28s ease;
@@ -384,6 +400,7 @@
 </head>
 <body>
 
+<div id="app-shell"><div id="app-frame">
 <!-- ══ LOADING ════════════════════════════════════════════════ -->
 <div id="s-loading" class="screen active">
   <svg width="160" height="101" viewBox="0 0 1486.16 937.89" xmlns="http://www.w3.org/2000/svg">
@@ -709,7 +726,8 @@
   </div>
 </div>
 
-<canvas id="compose-canvas" style="display:none"></canvas>
+<canvas id="compose-canvas" style="display:none">
+</div></div><!-- end app-frame / app-shell --></canvas>
 <input id="gallery-input" type="file" accept="image/*" style="display:none">
 
 <script>
