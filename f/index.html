@@ -847,8 +847,8 @@ function renderLanding(frame) {
 
   document.getElementById('cam-frame-overlay').src = frame.image_url;
 
-  const joined = Number(frame.web_join_count ?? 0);
-  const shares = Number(frame.web_share_count ?? 0);
+  const joined = Number(frame.join_count ?? 0);
+  const shares = Number(frame.share_count ?? 0);
   document.getElementById('stat-supporters').textContent  = joined.toLocaleString();
   document.getElementById('stat-shares').textContent      = shares.toLocaleString();
   document.getElementById('preview-stat-joined').textContent = joined.toLocaleString();
@@ -1028,8 +1028,8 @@ async function recordFrameEvent(eventType) {
   const updated = await fetchFrame(frameData.id);
   if (!updated) return;
   frameData = updated;
-  const joined = Number(frameData.web_join_count ?? 0);
-  const shares = Number(frameData.web_share_count ?? 0);
+  const joined = Number(frameData.join_count ?? 0);
+  const shares = Number(frameData.share_count ?? 0);
   document.getElementById('stat-supporters').textContent       = joined.toLocaleString();
   document.getElementById('stat-shares').textContent           = shares.toLocaleString();
   document.getElementById('preview-stat-joined').textContent   = joined.toLocaleString();
