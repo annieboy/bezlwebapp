@@ -679,7 +679,7 @@
           <path d="M3 19c0-3 2.7-5 6-5s6 2 6 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
           <path d="M16 5.5a3 3 0 010 6M18 19c0-2-1-3.5-2.5-4.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
         </svg>
-        2,108 <span style="color:#9b9ea6;font-weight:400">joined</span>
+        <span id="preview-stat-joined">0</span> <span style="color:#9b9ea6;font-weight:400">joined</span>
       </div>
       <div style="width:3px;height:3px;border-radius:999px;background:#d0d2d8"></div>
       <div style="display:flex;align-items:center;gap:6px;font-size:13px;color:#0c0d12;font-weight:600">
@@ -687,7 +687,7 @@
           <path d="M12 4l4 4M12 4l-4 4M12 4v12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M5 13v5a2 2 0 002 2h10a2 2 0 002-2v-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
         </svg>
-        820 <span style="color:#9b9ea6;font-weight:400">shares</span>
+        <span id="preview-stat-shares">0</span> <span style="color:#9b9ea6;font-weight:400">shares</span>
       </div>
     </div>
 
@@ -846,6 +846,15 @@ function renderLanding(frame) {
   };
 
   document.getElementById('cam-frame-overlay').src = frame.image_url;
+
+  const joined = Number(frame.web_join_count ?? 0);
+  const shares = Number(frame.web_share_count ?? 0);
+  document.getElementById('stat-supporters').textContent  = joined.toLocaleString();
+  document.getElementById('stat-shares').textContent      = shares.toLocaleString();
+  document.getElementById('preview-stat-joined').textContent = joined.toLocaleString();
+  document.getElementById('preview-stat-shares').textContent = shares.toLocaleString();
+  document.getElementById('stats-row').style.display = 'flex';
+
   showScreen('landing');
 }
 
@@ -978,6 +987,10 @@ function doCapture() {
     stopCamera();
     document.getElementById('preview-img').src = compositeDataUrl;
     showScreen('preview');
+    sb.rpc('increment_frame_join', { p_frame_id: frameData.id });
+    frameData.web_join_count = Number(frameData.web_join_count ?? 0) + 1;
+    document.getElementById('stat-supporters').textContent      = frameData.web_join_count.toLocaleString();
+    document.getElementById('preview-stat-joined').textContent  = frameData.web_join_count.toLocaleString();
   }, 80);
 }
 
@@ -1031,6 +1044,10 @@ async function nativeShare() {
       await navigator.share({ title: frameData?.title || 'My BEZL Frame',
         text: tag, url: window.location.href });
     }
+    sb.rpc('increment_frame_share', { p_frame_id: frameData.id });
+    frameData.web_share_count = Number(frameData.web_share_count ?? 0) + 1;
+    document.getElementById('stat-shares').textContent          = frameData.web_share_count.toLocaleString();
+    document.getElementById('preview-stat-shares').textContent  = frameData.web_share_count.toLocaleString();
   } catch (e) { if (e.name !== 'AbortError') downloadImage(); }
 }
 
@@ -1150,6 +1167,10 @@ document.addEventListener('DOMContentLoaded', () => {
       stopCamera();
       document.getElementById('preview-img').src = compositeDataUrl;
       showScreen('preview');
+      sb.rpc('increment_frame_join', { p_frame_id: frameData.id });
+      frameData.web_join_count = Number(frameData.web_join_count ?? 0) + 1;
+      document.getElementById('stat-supporters').textContent     = frameData.web_join_count.toLocaleString();
+      document.getElementById('preview-stat-joined').textContent = frameData.web_join_count.toLocaleString();
     };
     img.src = URL.createObjectURL(file);
   });
