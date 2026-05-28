@@ -987,7 +987,7 @@ function doCapture() {
     stopCamera();
     document.getElementById('preview-img').src = compositeDataUrl;
     showScreen('preview');
-    sb.rpc('increment_frame_join', { p_frame_id: frameData.id });
+    sb.rpc('record_frame_analytics_event', { p_frame_id: frameData.id, p_event_type: 'join', p_source: 'web' });
     frameData.web_join_count = Number(frameData.web_join_count ?? 0) + 1;
     document.getElementById('stat-supporters').textContent      = frameData.web_join_count.toLocaleString();
     document.getElementById('preview-stat-joined').textContent  = frameData.web_join_count.toLocaleString();
@@ -1044,7 +1044,7 @@ async function nativeShare() {
       await navigator.share({ title: frameData?.title || 'My BEZL Frame',
         text: tag, url: window.location.href });
     }
-    sb.rpc('increment_frame_share', { p_frame_id: frameData.id });
+    sb.rpc('record_frame_analytics_event', { p_frame_id: frameData.id, p_event_type: 'share', p_source: 'web' });
     frameData.web_share_count = Number(frameData.web_share_count ?? 0) + 1;
     document.getElementById('stat-shares').textContent          = frameData.web_share_count.toLocaleString();
     document.getElementById('preview-stat-shares').textContent  = frameData.web_share_count.toLocaleString();
@@ -1056,6 +1056,7 @@ function downloadImage() {
   a.href = compositeDataUrl;
   a.download = `bezl-${frameData?.id || 'frame'}.jpg`;
   a.click();
+  sb.rpc('record_frame_analytics_event', { p_frame_id: frameData.id, p_event_type: 'download', p_source: 'web' });
 }
 
 async function handleInvite() {
@@ -1102,6 +1103,7 @@ async function init() {
 
   buildFilterSwatches();
   renderLanding(frameData);
+  sb.rpc('record_frame_analytics_event', { p_frame_id: frameData.id, p_event_type: 'scan', p_source: 'web' });
 }
 
 /* ── Events ─────────────────────────────────────────────── */
@@ -1167,7 +1169,7 @@ document.addEventListener('DOMContentLoaded', () => {
       stopCamera();
       document.getElementById('preview-img').src = compositeDataUrl;
       showScreen('preview');
-      sb.rpc('increment_frame_join', { p_frame_id: frameData.id });
+      sb.rpc('record_frame_analytics_event', { p_frame_id: frameData.id, p_event_type: 'join', p_source: 'web' });
       frameData.web_join_count = Number(frameData.web_join_count ?? 0) + 1;
       document.getElementById('stat-supporters').textContent     = frameData.web_join_count.toLocaleString();
       document.getElementById('preview-stat-joined').textContent = frameData.web_join_count.toLocaleString();
