@@ -1,64 +1,625 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BEZL</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bezl — Frame Memories. Share What Matters.</title>
+  <meta name="description" content="A creative photo-framing app that turns your photos into beautifully framed moments. Browse hundreds of templates, edit, and share in seconds." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body {
-      height: 100%; font-family: "Inter", -apple-system, system-ui, sans-serif;
-      background: #fff; color: #0c0d12;
-      -webkit-font-smoothing: antialiased;
+
+    :root {
+      --bezl-purple: #5b4bdb;
+      --bezl-purple-dark: #4a3bc0;
+      --bezl-purple-light: #7c6ee8;
+      --bezl-teal: #1a9b9b;
+      --bezl-teal-dark: #157a7a;
+      --navy: #0d1829;
+      --off-white: #f7f9fb;
+      --gray-100: #f0f4f8;
+      --gray-200: #dde6ef;
+      --gray-400: #8aa4bc;
+      --text: #0d1829;
+      --text-muted: #4a6070;
+      --radius: 14px;
+      --radius-lg: 24px;
     }
+
+    html { scroll-behavior: smooth; }
+
     body {
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 32px; padding: 40px 24px; min-height: 100%;
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      background: #fff;
+      line-height: 1.6;
+      overflow-x: hidden;
     }
-    .wordmark svg { width: 180px; height: auto; display: block; }
-    .tagline {
-      font-size: 15px; color: #54565e; text-align: center;
-      line-height: 1.55; max-width: 280px;
+
+    h1, h2, h3, h4 { font-family: 'Sora', sans-serif; line-height: 1.15; }
+
+    a { text-decoration: none; color: inherit; }
+
+    img { max-width: 100%; display: block; }
+
+    /* ── UTILITY ── */
+    .container { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 28px; border-radius: 50px; font-weight: 600;
+      font-size: .95rem; cursor: pointer; transition: all .25s ease;
+      border: 2px solid transparent; white-space: nowrap;
     }
-    .app-btn {
-      display: inline-flex; align-items: center; gap: 10px;
-      padding: 14px 24px; border-radius: 999px;
-      background: #0c0d12; color: #fff;
-      font-size: 14px; font-weight: 600;
-      text-decoration: none; letter-spacing: -0.005em;
-      transition: transform 0.12s;
+    .btn-bezl { background: var(--bezl-purple); color: #fff; box-shadow: 0 4px 18px rgba(91,75,219,.35); }
+    .btn-bezl:hover { background: var(--bezl-purple-dark); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(91,75,219,.4); }
+    .btn-bezl-outline { background: transparent; color: var(--bezl-purple); border-color: var(--bezl-purple); }
+    .btn-bezl-outline:hover { background: var(--bezl-purple); color: #fff; transform: translateY(-2px); }
+    .btn-white { background: #fff; color: var(--bezl-purple); }
+    .btn-white:hover { background: var(--gray-100); transform: translateY(-2px); }
+    .btn-outline-white { background: transparent; color: #fff; border-color: rgba(255,255,255,.5); }
+    .btn-outline-white:hover { background: rgba(255,255,255,.1); border-color: #fff; }
+
+    .tag {
+      display: inline-block; padding: 6px 16px; border-radius: 50px;
+      font-size: .78rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
     }
-    .app-btn:active { transform: scale(0.97); }
+    .tag-bezl { background: rgba(91,75,219,.1); color: var(--bezl-purple); }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+      padding: 0 24px;
+      transition: background .3s, box-shadow .3s;
+    }
+    nav.scrolled {
+      background: rgba(255,255,255,.95);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 2px 20px rgba(0,0,0,.08);
+    }
+    .nav-inner {
+      max-width: 1160px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 72px;
+    }
+    .nav-logo { display: flex; align-items: center; }
+    .nav-logo svg { height: 36px; width: auto; }
+    .nav-links { display: flex; align-items: center; gap: 36px; }
+    .nav-links a { font-weight: 500; color: rgba(255,255,255,.92); font-size: .95rem; transition: color .2s; }
+    .nav-links a:hover { color: #fff; }
+    nav.scrolled .nav-links a { color: var(--navy); }
+    nav.scrolled .nav-links a:hover { color: var(--bezl-purple); }
+    .nav-cta { display: flex; align-items: center; gap: 12px; }
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
+    .hamburger span { display: block; width: 24px; height: 2px; background: #fff; border-radius: 2px; transition: all .3s; }
+    nav.scrolled .hamburger span { background: var(--navy); }
+
+    /* ── MOBILE NAV ── */
+    .mobile-nav {
+      display: none; position: fixed; top: 72px; left: 0; right: 0; bottom: 0;
+      background: rgba(255,255,255,.98); backdrop-filter: blur(16px);
+      z-index: 999; flex-direction: column; padding: 32px 24px;
+      gap: 8px; overflow-y: auto;
+    }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav a { font-size: 1.2rem; font-weight: 600; padding: 14px 0; border-bottom: 1px solid var(--gray-200); color: var(--navy); }
+    .mobile-nav a:hover { color: var(--bezl-purple); }
+    .mobile-nav .btn { margin-top: 12px; justify-content: center; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh; display: flex; flex-direction: column;
+      background: linear-gradient(135deg, #5b4bdb 0%, #1a9b9b 100%);
+      position: relative; overflow: hidden;
+    }
+    .hero-bg-shapes { position: absolute; inset: 0; pointer-events: none; }
+    .hero-bg-shapes::before {
+      content: ''; position: absolute;
+      width: 600px; height: 600px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,.12) 0%, transparent 70%);
+      top: -150px; right: -100px;
+    }
+    .hero-bg-shapes::after {
+      content: ''; position: absolute;
+      width: 400px; height: 400px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,.08) 0%, transparent 70%);
+      bottom: 50px; left: 5%;
+    }
+    .hero-grid-line {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+    .hero-content {
+      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 140px 24px 60px;
+      max-width: 1160px; margin: 0 auto; width: 100%;
+      text-align: center;
+    }
+    .hero-tag { margin-bottom: 24px; }
+    .hero-tag span {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.35);
+      color: #fff; padding: 8px 18px; border-radius: 50px;
+      font-size: .82rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase;
+    }
+    .hero-tag span::before {
+      content: ''; width: 8px; height: 8px; border-radius: 50%;
+      background: #fff; animation: pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+    .hero h1 {
+      font-size: clamp(2.4rem, 5vw, 4rem); font-weight: 800; color: #fff;
+      margin-bottom: 24px; line-height: 1.1;
+    }
+    .hero-subtitle {
+      font-size: 1.15rem; color: rgba(255,255,255,.8); margin-bottom: 40px;
+      max-width: 560px; line-height: 1.7;
+    }
+    .hero-buttons { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin-bottom: 64px; }
+
+    /* Hero screenshot strip */
+    .hero-screenshots {
+      width: 100%; max-width: 900px;
+      display: flex; gap: 16px; overflow-x: auto;
+      padding-bottom: 8px; scroll-snap-type: x mandatory;
+    }
+    .hero-screenshots::-webkit-scrollbar { height: 4px; }
+    .hero-screenshots::-webkit-scrollbar-track { background: rgba(255,255,255,.1); border-radius: 2px; }
+    .hero-screenshots::-webkit-scrollbar-thumb { background: rgba(255,255,255,.4); border-radius: 2px; }
+    .bezl-screenshot {
+      flex-shrink: 0; width: 140px; aspect-ratio: 9/16;
+      border-radius: 16px; scroll-snap-align: start;
+      background: linear-gradient(160deg, rgba(255,255,255,.25) 0%, rgba(255,255,255,.08) 100%);
+      border: 1px solid rgba(255,255,255,.25);
+      overflow: hidden;
+      transition: transform .2s, box-shadow .2s;
+      backdrop-filter: blur(4px);
+    }
+    .bezl-screenshot img { width: 100%; height: 100%; object-fit: cover; }
+    .bezl-screenshot:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 16px 40px rgba(0,0,0,.3); }
+
+    /* ── SECTION COMMON ── */
+    section { padding: 100px 0; }
+    .section-header { text-align: center; margin-bottom: 64px; }
+    .section-header h2 { font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 800; margin: 12px 0 16px; }
+    .section-header p { font-size: 1.05rem; color: var(--text-muted); max-width: 540px; margin: 0 auto; }
+
+    /* ── FEATURES ── */
+    .features { background: #fff; }
+    .features-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px; }
+    .feature-card {
+      background: var(--off-white); border-radius: var(--radius-lg);
+      padding: 40px 32px; border: 1px solid var(--gray-200);
+      transition: all .3s ease; position: relative; overflow: hidden;
+    }
+    .feature-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--bezl-purple), var(--bezl-teal));
+      transform: scaleX(0); transform-origin: left; transition: transform .3s;
+    }
+    .feature-card:hover { transform: translateY(-6px); box-shadow: 0 12px 48px rgba(91,75,219,.15); border-color: transparent; background: #fff; }
+    .feature-card:hover::before { transform: scaleX(1); }
+    .feature-icon {
+      width: 52px; height: 52px; border-radius: 14px; background: rgba(91,75,219,.1);
+      display: flex; align-items: center; justify-content: center; margin-bottom: 20px;
+      transition: background .3s;
+    }
+    .feature-card:hover .feature-icon { background: var(--bezl-purple); }
+    .feature-icon svg { width: 26px; height: 26px; stroke: var(--bezl-purple); fill: none; stroke-width: 1.8; transition: stroke .3s; }
+    .feature-card:hover .feature-icon svg { stroke: #fff; }
+    .feature-card h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 12px; }
+    .feature-card p { color: var(--text-muted); font-size: .93rem; line-height: 1.7; }
+
+    /* ── APP SCREENSHOTS ── */
+    .app-screenshots { background: #faf9ff; }
+    .bezl-shot-wrap { display: flex; flex-direction: column; gap: 12px; }
+    .bezl-shot {
+      aspect-ratio: 9/16; border-radius: 18px; max-width: 180px; width: 100%; margin: 0 auto;
+      background: linear-gradient(160deg, var(--bezl-purple) 0%, var(--bezl-teal) 100%);
+      overflow: hidden;
+      transition: transform .3s, box-shadow .3s;
+    }
+    .bezl-shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .bezl-shot:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(91,75,219,.25); }
+    .shot-caption { text-align: center; font-size: .82rem; color: var(--text-muted); font-weight: 500; margin-top: 4px; }
+
+    /* ── CTA BANNER ── */
+    .cta-banner {
+      background: linear-gradient(135deg, #5b4bdb 0%, #1a9b9b 100%);
+      padding: 80px 0; text-align: center; position: relative; overflow: hidden;
+    }
+    .cta-banner::before {
+      content: ''; position: absolute;
+      width: 500px; height: 500px; border-radius: 50%;
+      background: rgba(255,255,255,.06); top: -200px; right: 10%;
+      pointer-events: none;
+    }
+    .cta-banner h2 {
+      font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 800; color: #fff;
+      margin-bottom: 16px;
+    }
+    .cta-banner p { color: rgba(255,255,255,.8); font-size: 1.05rem; margin-bottom: 36px; }
+    .cta-banner-buttons { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; }
+
+    /* ── FOOTER ── */
+    footer {
+      background: #0c0d12; color: rgba(255,255,255,.7);
+      padding: 64px 0 32px;
+    }
+    .footer-grid {
+      display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 48px;
+      padding-bottom: 48px; border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .footer-logo { display: flex; align-items: center; margin-bottom: 16px; }
+    .footer-logo svg { height: 44px; width: auto; display: block; }
+    .footer-brand p { font-size: .88rem; line-height: 1.7; max-width: 280px; }
+    .footer-socials { display: flex; gap: 10px; margin-top: 24px; }
+    .social-btn {
+      width: 36px; height: 36px; border-radius: 8px; border: 1px solid rgba(255,255,255,.15);
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,.5); transition: all .2s;
+    }
+    .social-btn:hover { border-color: var(--bezl-purple); color: var(--bezl-purple-light); background: rgba(91,75,219,.1); }
+    .social-btn svg { width: 16px; height: 16px; fill: currentColor; }
+    .footer-col h4 { color: #fff; font-size: .9rem; font-weight: 700; margin-bottom: 20px; }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .footer-col ul li a { font-size: .88rem; color: rgba(255,255,255,.55); transition: color .2s; }
+    .footer-col ul li a:hover { color: var(--bezl-purple-light); }
+    .footer-bottom {
+      padding-top: 32px; display: flex; align-items: center; justify-content: space-between;
+      font-size: .82rem; color: rgba(255,255,255,.35); flex-wrap: wrap; gap: 12px;
+    }
+    .footer-bottom a { color: rgba(255,255,255,.35); transition: color .2s; }
+    .footer-bottom a:hover { color: rgba(255,255,255,.6); }
+
+    /* ── ANIMATIONS ── */
+    .fade-up { opacity: 0; transform: translateY(30px); transition: opacity .6s ease, transform .6s ease; }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+    .fade-up-delay-1 { transition-delay: .1s; }
+    .fade-up-delay-2 { transition-delay: .2s; }
+    .fade-up-delay-3 { transition-delay: .3s; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1024px) {
+      .features-grid { grid-template-columns: 1fr 1fr; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      .nav-links, .nav-cta { display: none; }
+      .hamburger { display: flex; }
+      .features-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .hero-screenshots { max-width: 100%; }
+      .bezl-screenshot { width: 120px; }
+    }
   </style>
 </head>
 <body>
 
-  <div class="wordmark">
-    <svg viewBox="0 0 1486.16 937.89" xmlns="http://www.w3.org/2000/svg">
-      <defs><style>.hc1{fill:#5A43FE}.hc2{fill:#5A43FE}.hc3{fill:#0c0d12}</style></defs>
-      <path class="hc3" d="M929.66,358.85h-147v112h126v87.5h-126v115.5h147v87.5h-245v-490h245v87.5Z"/>
-      <path class="hc3" d="M1223.66,323.85l-141.4,350h141.4v87.5h-255.5v-52.5l141.4-350h-141.4v-87.5h255.5v52.5Z"/>
-      <path class="hc3" d="M1360.16,673.85h126v87.5h-224v-490h98v402.5Z"/>
-      <path class="hc1" d="M832.27,201.87c0,14-5.54,29.52-16.62,46.58-11.08,17.06-25.3,34.26-42.64,51.61-17.35,17.35-36.67,34.26-57.95,50.73-21.29,16.48-42.28,31.27-62.98,44.39-17.21,10.79-33.75,20.63-49.64,29.52-15.9,8.9-30.76,17.28-44.61,25.15-13.85,7.87-26.46,15.38-37.83,22.52-11.37,7.15-21.29,14.36-29.74,21.65,20.99,3.79,39.65,7.51,55.98,11.15,16.33,3.65,29.3,7.95,38.92,12.9,7,4.96,14.14,12.32,21.43,22.09,7.28,9.77,13.84,19.76,19.68,29.96,5.83,10.21,10.56,19.46,14.21,27.77,3.64,8.31,5.47,13.34,5.47,15.09,0,12.83-3.28,26.39-9.84,40.67-6.56,14.29-15.6,28.5-27.12,42.64-11.52,14.15-25.22,27.77-41.11,40.89-15.9,13.12-33.24,25-52.04,35.64-18.81,10.64-38.71,19.68-59.7,27.12-20.99,7.43-42.28,12.31-63.85,14.65-9.62-7.87-18.96-16.26-27.99-25.15-9.04-8.9-17.21-17.21-24.49-24.93-7.29-7.72-13.41-14.43-18.37-20.12-4.96-5.69-8.02-9.25-9.18-10.71-10.5,16.33-21.14,31.2-31.93,44.61-10.79,13.41-21.5,24.71-32.14,33.89-10.65,9.18-21.29,16.18-31.93,20.99-10.65,4.81-21.21,6.92-31.71,6.34-4.37-.29-8.89-1.97-13.56-5.03-4.66-3.06-9.18-6.93-13.56-11.59-4.37-4.67-8.53-9.77-12.46-15.31-3.94-5.54-7.43-10.86-10.5-15.96-3.06-5.1-5.47-9.77-7.22-14-1.75-4.23-2.62-7.22-2.62-8.97,0-30.61,6.49-64.73,19.46-102.34,12.98-37.61,30.69-76.54,53.14-116.77,22.45-40.24,48.98-80.54,79.6-120.93,30.61-40.38,63.56-78.65,98.84-114.8,11.66-41.99,21.14-82.8,28.43-122.46,7.28-39.65,11.22-75.95,11.81-108.9,19.24,10.21,34.69,20.19,46.36,29.96,11.66,9.77,20.84,18.44,27.55,26.02,7.58,9.04,13.12,17.64,16.62,25.8,1.75,5.25,2.62,12.68,2.62,22.3,0,1.75-.07,3.57-.22,5.47-.15,1.9-.37,3.87-.66,5.9,40.82-29.15,81.41-52.41,121.8-69.76,40.38-17.34,79.08-26.02,116.12-26.02,4.66,0,10.06,1.75,16.18,5.25,6.12,3.5,12.31,8.17,18.59,14,6.27,5.84,12.53,12.32,18.81,19.46,6.27,7.15,11.81,14.43,16.62,21.87,4.81,7.43,8.67,14.58,11.59,21.43,2.91,6.85,4.37,12.76,4.37,17.71ZM186.31,756.43c2.62,0,6.49-3.28,11.59-9.84,5.1-6.56,11.08-15.74,17.93-27.55,6.85-11.81,14.43-26.09,22.74-42.86,8.31-16.76,16.98-35.28,26.02-55.54,9.03-20.26,18.29-42.05,27.77-65.38,9.47-23.32,18.87-47.52,28.21-72.6-17.21,21.87-33.39,43.95-48.55,66.26-15.16,22.3-28.8,44.54-40.89,66.7-12.1,22.16-22.46,44.1-31.05,65.82-8.6,21.72-14.94,42.79-19.02,63.2-.87,4.09-.66,7.07.66,8.97,1.31,1.9,2.84,2.84,4.59,2.84ZM418.1,516.76c-15.46,39.65-32,78.07-49.64,115.24-17.64,37.17-36.08,70.78-55.32,100.81,33.24-2.91,64.14-7.8,92.72-14.65,28.57-6.85,54.37-15.96,77.41-27.33,23.03-11.37,43.22-25.37,60.57-41.99,17.34-16.62,31.56-36.15,42.64-58.6-5.84-3.21-12.18-6.12-19.02-8.75-6.85-2.62-14.07-4.95-21.65-7-7.59-2.04-15.24-3.86-22.96-5.47-7.73-1.6-15.24-3.13-22.52-4.59-16.91-2.91-34.41-5.25-52.48-7-4.09-.58-8.82-4.95-14.21-13.12-5.4-8.16-10.57-17.34-15.53-27.55ZM486.33,309.02c-4.96,18.08-10.43,36.96-16.4,56.64-5.98,19.68-12.46,40.02-19.46,61.01,26.24-21.28,54.45-41.4,84.63-60.35,30.18-18.95,60.14-38.27,89.87-57.95,29.74-19.68,57.87-40.67,84.41-62.98,26.53-22.3,49.27-47.6,68.23-75.88,1.16-1.46,1.67-3.21,1.53-5.25-.15-2.04-.81-4-1.97-5.9-1.17-1.89-2.7-3.5-4.59-4.81-1.9-1.31-4.15-1.97-6.78-1.97-16.33,0-35.06,3.87-56.2,11.59-21.14,7.73-43.81,18.52-68.01,32.36-24.2,13.85-49.5,30.47-75.88,49.86-26.39,19.39-52.85,40.6-79.38,63.63Z"/>
-      <path class="hc2" d="M791.42,927.88c20.77-4.28,41.9-6.4,62.98-8.02,14.66-1.1,29.39-1.65,44.07-2.03,8.02-.32,15.34-5.86,17.95-13.44,1.25-3.38,1.12-7.02,1.26-10.59,1.23-31.63,3.44-63.36,9.71-94.47,4.3,20.77,6.43,41.9,8.05,62.98.79,10.5,1.28,20.99,1.66,31.49.33,5.6.15,11.28-1.5,16.69-4.65,15.84-20.17,27.53-36.71,27.39-.93.07-4.18-.08-5.13-.08-34.27-1.01-68.64-3.22-102.34-9.91h0Z"/>
-      <path class="hc2" d="M145.82,10.01c-20.77,4.28-41.9,6.4-62.98,8.02-14.66,1.1-29.39,1.65-44.07,2.03-8.02.32-15.34,5.86-17.95,13.44-1.25,3.38-1.12,7.02-1.26,10.59-1.23,31.63-3.44,63.36-9.71,94.47-4.3-20.77-6.43-41.9-8.05-62.98-.79-10.5-1.28-20.99-1.66-31.49-.33-5.6-.15-11.28,1.5-16.69C6.29,11.57,21.81-.12,38.34.02c.93-.07,4.18.08,5.13.08,34.27,1.01,68.64,3.22,102.34,9.91h0Z"/>
-      <path class="hc2" d="M145.82,927.88c-33.7,6.7-68.08,8.9-102.34,9.91-.97.03-4.2.11-5.13.08-16.54.14-32.05-11.55-36.71-27.39-1.65-5.4-1.82-11.09-1.5-16.68.38-10.5.87-20.99,1.66-31.49,1.62-21.08,3.75-42.21,8.05-62.98,6.27,31.11,8.48,62.84,9.71,94.47.14,3.56.02,7.21,1.26,10.59,2.61,7.58,9.92,13.12,17.95,13.44,14.68.39,29.41.94,44.07,2.03,21.08,1.63,42.21,3.74,62.98,8.02h0Z"/>
-      <path class="hc2" d="M791.45,10.01C825.16,3.31,859.53,1.11,893.79.1c.97-.03,4.2-.11,5.13-.08,16.54-.14,32.05,11.55,36.71,27.39,1.65,5.4,1.82,11.09,1.5,16.68-.38,10.5-.87,20.99-1.66,31.49-1.62,21.08-3.75,42.21-8.05,62.98-6.27-31.11-8.48-62.84-9.71-94.47-.14-3.56-.02-7.21-1.26-10.59-2.61-7.58-9.92-13.12-17.95-13.44-14.68-.39-29.41-.94-44.07-2.03-21.08-1.63-42.21-3.74-62.98-8.02h0Z"/>
-    </svg>
+<!-- ── NAVIGATION ── -->
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="#home" class="nav-logo">
+      <svg viewBox="0 0 1486.16 937.89" xmlns="http://www.w3.org/2000/svg">
+        <defs><style>.nc1{fill:#5A43FE}.nc2{fill:#0c0d12}</style></defs>
+        <path class="nc2" d="M929.66,358.85h-147v112h126v87.5h-126v115.5h147v87.5h-245v-490h245v87.5Z" style="fill:#fff"/>
+        <path class="nc2" d="M1223.66,323.85l-141.4,350h141.4v87.5h-255.5v-52.5l141.4-350h-141.4v-87.5h255.5v52.5Z" style="fill:#fff"/>
+        <path class="nc2" d="M1360.16,673.85h126v87.5h-224v-490h98v402.5Z" style="fill:#fff"/>
+        <path class="nc1" d="M832.27,201.87c0,14-5.54,29.52-16.62,46.58-11.08,17.06-25.3,34.26-42.64,51.61-17.35,17.35-36.67,34.26-57.95,50.73-21.29,16.48-42.28,31.27-62.98,44.39-17.21,10.79-33.75,20.63-49.64,29.52-15.9,8.9-30.76,17.28-44.61,25.15-13.85,7.87-26.46,15.38-37.83,22.52-11.37,7.15-21.29,14.36-29.74,21.65,20.99,3.79,39.65,7.51,55.98,11.15,16.33,3.65,29.3,7.95,38.92,12.9,7,4.96,14.14,12.32,21.43,22.09,7.28,9.77,13.84,19.76,19.68,29.96,5.83,10.21,10.56,19.46,14.21,27.77,3.64,8.31,5.47,13.34,5.47,15.09,0,12.83-3.28,26.39-9.84,40.67-6.56,14.29-15.6,28.5-27.12,42.64-11.52,14.15-25.22,27.77-41.11,40.89-15.9,13.12-33.24,25-52.04,35.64-18.81,10.64-38.71,19.68-59.7,27.12-20.99,7.43-42.28,12.31-63.85,14.65-9.62-7.87-18.96-16.26-27.99-25.15-9.04-8.9-17.21-17.21-24.49-24.93-7.29-7.72-13.41-14.43-18.37-20.12-4.96-5.69-8.02-9.25-9.18-10.71-10.5,16.33-21.14,31.2-31.93,44.61-10.79,13.41-21.5,24.71-32.14,33.89-10.65,9.18-21.29,16.18-31.93,20.99-10.65,4.81-21.21,6.92-31.71,6.34-4.37-.29-8.89-1.97-13.56-5.03-4.66-3.06-9.18-6.93-13.56-11.59-4.37-4.67-8.53-9.77-12.46-15.31-3.94-5.54-7.43-10.86-10.5-15.96-3.06-5.1-5.47-9.77-7.22-14-1.75-4.23-2.62-7.22-2.62-8.97,0-30.61,6.49-64.73,19.46-102.34,12.98-37.61,30.69-76.54,53.14-116.77,22.45-40.24,48.98-80.54,79.6-120.93,30.61-40.38,63.56-78.65,98.84-114.8,11.66-41.99,21.14-82.8,28.43-122.46,7.28-39.65,11.22-75.95,11.81-108.9,19.24,10.21,34.69,20.19,46.36,29.96,11.66,9.77,20.84,18.44,27.55,26.02,7.58,9.04,13.12,17.64,16.62,25.8,1.75,5.25,2.62,12.68,2.62,22.3,0,1.75-.07,3.57-.22,5.47-.15,1.9-.37,3.87-.66,5.9,40.82-29.15,81.41-52.41,121.8-69.76,40.38-17.34,79.08-26.02,116.12-26.02,4.66,0,10.06,1.75,16.18,5.25,6.12,3.5,12.31,8.17,18.59,14,6.27,5.84,12.53,12.32,18.81,19.46,6.27,7.15,11.81,14.43,16.62,21.87,4.81,7.43,8.67,14.58,11.59,21.43,2.91,6.85,4.37,12.76,4.37,17.71ZM186.31,756.43c2.62,0,6.49-3.28,11.59-9.84,5.1-6.56,11.08-15.74,17.93-27.55,6.85-11.81,14.43-26.09,22.74-42.86,8.31-16.76,16.98-35.28,26.02-55.54,9.03-20.26,18.29-42.05,27.77-65.38,9.47-23.32,18.87-47.52,28.21-72.6-17.21,21.87-33.39,43.95-48.55,66.26-15.16,22.3-28.8,44.54-40.89,66.7-12.1,22.16-22.46,44.1-31.05,65.82-8.6,21.72-14.94,42.79-19.02,63.2-.87,4.09-.66,7.07.66,8.97,1.31,1.9,2.84,2.84,4.59,2.84ZM418.1,516.76c-15.46,39.65-32,78.07-49.64,115.24-17.64,37.17-36.08,70.78-55.32,100.81,33.24-2.91,64.14-7.8,92.72-14.65,28.57-6.85,54.37-15.96,77.41-27.33,23.03-11.37,43.22-25.37,60.57-41.99,17.34-16.62,31.56-36.15,42.64-58.6-5.84-3.21-12.18-6.12-19.02-8.75-6.85-2.62-14.07-4.95-21.65-7-7.59-2.04-15.24-3.86-22.96-5.47-7.73-1.6-15.24-3.13-22.52-4.59-16.91-2.91-34.41-5.25-52.48-7-4.09-.58-8.82-4.95-14.21-13.12-5.4-8.16-10.57-17.34-15.53-27.55ZM486.33,309.02c-4.96,18.08-10.43,36.96-16.4,56.64-5.98,19.68-12.46,40.02-19.46,61.01,26.24-21.28,54.45-41.4,84.63-60.35,30.18-18.95,60.14-38.27,89.87-57.95,29.74-19.68,57.87-40.67,84.41-62.98,26.53-22.3,49.27-47.6,68.23-75.88,1.16-1.46,1.67-3.21,1.53-5.25-.15-2.04-.81-4-1.97-5.9-1.17-1.89-2.7-3.5-4.59-4.81-1.9-1.31-4.15-1.97-6.78-1.97-16.33,0-35.06,3.87-56.2,11.59-21.14,7.73-43.81,18.52-68.01,32.36-24.2,13.85-49.5,30.47-75.88,49.86-26.39,19.39-52.85,40.6-79.38,63.63Z"/>
+        <path class="nc1" d="M791.42,927.88c20.77-4.28,41.9-6.4,62.98-8.02,14.66-1.1,29.39-1.65,44.07-2.03,8.02-.32,15.34-5.86,17.95-13.44,1.25-3.38,1.12-7.02,1.26-10.59,1.23-31.63,3.44-63.36,9.71-94.47,4.3,20.77,6.43,41.9,8.05,62.98.79,10.5,1.28,20.99,1.66,31.49.33,5.6.15,11.28-1.5,16.69-4.65,15.84-20.17,27.53-36.71,27.39-.93.07-4.18-.08-5.13-.08-34.27-1.01-68.64-3.22-102.34-9.91h0Z"/>
+        <path class="nc1" d="M145.82,10.01c-20.77,4.28-41.9,6.4-62.98,8.02-14.66,1.1-29.39,1.65-44.07,2.03-8.02.32-15.34,5.86-17.95,13.44-1.25,3.38-1.12,7.02-1.26,10.59-1.23,31.63-3.44,63.36-9.71,94.47-4.3-20.77-6.43-41.9-8.05-62.98-.79-10.5-1.28-20.99-1.66-31.49-.33-5.6-.15-11.28,1.5-16.69C6.29,11.57,21.81-.12,38.34.02c.93-.07,4.18.08,5.13.08,34.27,1.01,68.64,3.22,102.34,9.91h0Z"/>
+        <path class="nc1" d="M145.82,927.88c-33.7,6.7-68.08,8.9-102.34,9.91-.97.03-4.2.11-5.13.08-16.54.14-32.05-11.55-36.71-27.39-1.65-5.4-1.82-11.09-1.5-16.68.38-10.5.87-20.99,1.66-31.49,1.62-21.08,3.75-42.21,8.05-62.98,6.27,31.11,8.48,62.84,9.71,94.47.14,3.56.02,7.21,1.26,10.59,2.61,7.58,9.92,13.12,17.95,13.44,14.68.39,29.41.94,44.07,2.03,21.08,1.63,42.21,3.74,62.98,8.02h0Z"/>
+        <path class="nc1" d="M791.45,10.01C825.16,3.31,859.53,1.11,893.79.1c.97-.03,4.2-.11,5.13-.08,16.54-.14,32.05,11.55,36.71,27.39,1.65,5.4,1.82,11.09,1.5,16.68-.38,10.5-.87,20.99-1.66,31.49-1.62,21.08-3.75,42.21-8.05,62.98-6.27-31.11-8.48-62.84-9.71-94.47-.14-3.56-.02-7.21-1.26-10.59-2.61-7.58-9.92-13.12-17.95-13.44-14.68-.39-29.41-.94-44.07-2.03-21.08-1.63-42.21-3.74-62.98-8.02h0Z"/>
+      </svg>
+    </a>
+
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#app-screenshots">Screenshots</a>
+      <a href="#download">Download</a>
+    </div>
+
+    <div class="nav-cta">
+      <a href="https://apps.apple.com/us/app/bezl/id6763313319" target="_blank" rel="noopener" class="btn btn-bezl" style="padding:11px 22px;font-size:.88rem;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        Download
+      </a>
+    </div>
+
+    <div class="hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </div>
   </div>
+</nav>
 
-  <p class="tagline">Create and share selfie frames.<br>Scan a QR code to get started.</p>
+<!-- Mobile Nav -->
+<div class="mobile-nav" id="mobileNav">
+  <a href="#features" class="mobile-link">Features</a>
+  <a href="#app-screenshots" class="mobile-link">Screenshots</a>
+  <a href="#download" class="mobile-link">Download</a>
+  <a href="https://apps.apple.com/us/app/bezl/id6763313319" target="_blank" rel="noopener" class="btn btn-bezl">Download on App Store</a>
+</div>
 
-  <a href="https://apps.apple.com/us/app/bezl/id6763313319" target="_blank" rel="noopener" class="app-btn">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
-    </svg>
-    Download BEZL
-  </a>
+<!-- ── HERO ── -->
+<section class="hero" id="home">
+  <div class="hero-bg-shapes"></div>
+  <div class="hero-grid-line"></div>
+
+  <div class="hero-content container">
+    <div class="hero-tag">
+      <span>Now Available on iOS</span>
+    </div>
+    <h1>Frame memories.<br/>Share what matters.</h1>
+    <p class="hero-subtitle">
+      A creative photo-framing app that turns your photos into beautifully framed moments. Browse hundreds of templates, edit, and share in seconds.
+    </p>
+    <div class="hero-buttons">
+      <a href="https://apps.apple.com/us/app/bezl/id6763313319" target="_blank" rel="noopener" class="btn btn-white">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        Download on App Store
+      </a>
+      <a href="https://web.bezlapp.com/f/9CFC8522-7595-4286-879A-A06546642D53" target="_blank" rel="noopener" class="btn btn-outline-white">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+        Try on Web
+      </a>
+    </div>
+
+    <!-- Hero screenshot strip -->
+    <div class="hero-screenshots">
+      <div class="bezl-screenshot">
+        <img src="bezl-1.png" alt="Bezl splash screen" onerror="this.style.display='none'"/>
+      </div>
+      <div class="bezl-screenshot">
+        <img src="bezl-2.png" alt="Bezl browse screen" onerror="this.style.display='none'"/>
+      </div>
+      <div class="bezl-screenshot">
+        <img src="bezl-3.png" alt="Bezl editor — background" onerror="this.style.display='none'"/>
+      </div>
+      <div class="bezl-screenshot">
+        <img src="bezl-4.png" alt="Bezl editor — text" onerror="this.style.display='none'"/>
+      </div>
+      <div class="bezl-screenshot">
+        <img src="bezl-5.png" alt="Bezl editor — frame" onerror="this.style.display='none'"/>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FEATURES ── -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="section-header fade-up">
+      <span class="tag tag-bezl">Features</span>
+      <h2>Everything You Need to Frame Perfectly</h2>
+      <p>Hundreds of templates, a powerful editor, and one-tap sharing — all in one beautiful app.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card fade-up">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="2"/><rect x="6" y="6" width="12" height="12" rx="1"/></svg>
+        </div>
+        <h3>Frame Templates</h3>
+        <p>Hundreds of curated frame templates to choose from. Classic polaroids, seasonal themes, minimal borders — there's a style for every memory.</p>
+      </div>
+
+      <div class="feature-card fade-up fade-up-delay-1">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </div>
+        <h3>Custom Editor</h3>
+        <p>Filters, backdrops, colours, and text overlays — our intuitive editor puts full creative control in your hands, with zero learning curve.</p>
+      </div>
+
+      <div class="feature-card fade-up fade-up-delay-2">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><rect x="1" y="4" width="18" height="16" rx="1"/><rect x="1" y="20" width="18" height="3" rx="0"/><line x1="7" y1="20" x2="7" y2="23"/><line x1="13" y1="20" x2="13" y2="23"/></svg>
+        </div>
+        <h3>Polaroid Style</h3>
+        <p>Classic polaroid and bordered frame styles that bring warmth and nostalgia to your favourite photos. Customise the caption strip too.</p>
+      </div>
+
+      <div class="feature-card fade-up fade-up-delay-3">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        </div>
+        <h3>One-tap Share</h3>
+        <p>Share instantly to any social platform — Instagram, WhatsApp, TikTok, and more. Your framed photo, ready to post in seconds.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── APP SCREENSHOTS ── -->
+<section class="app-screenshots" id="app-screenshots">
+  <div class="container">
+    <div class="section-header fade-up">
+      <span class="tag tag-bezl">App Screenshots</span>
+      <h2>See Bezl in Action</h2>
+      <p>Browse frames, edit your photos, and share in seconds.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:20px;justify-items:center;" class="fade-up">
+      <div class="bezl-shot-wrap">
+        <div class="bezl-shot"><img src="bezl-1.png" alt="Splash" onerror="this.style.display='none'"/></div>
+        <div class="shot-caption">Splash</div>
+      </div>
+      <div class="bezl-shot-wrap">
+        <div class="bezl-shot"><img src="bezl-2.png" alt="Browse" onerror="this.style.display='none'"/></div>
+        <div class="shot-caption">Browse</div>
+      </div>
+      <div class="bezl-shot-wrap">
+        <div class="bezl-shot"><img src="bezl-3.png" alt="Background" onerror="this.style.display='none'"/></div>
+        <div class="shot-caption">Background</div>
+      </div>
+      <div class="bezl-shot-wrap">
+        <div class="bezl-shot"><img src="bezl-4.png" alt="Text" onerror="this.style.display='none'"/></div>
+        <div class="shot-caption">Text</div>
+      </div>
+      <div class="bezl-shot-wrap">
+        <div class="bezl-shot"><img src="bezl-5.png" alt="Frame" onerror="this.style.display='none'"/></div>
+        <div class="shot-caption">Frame</div>
+      </div>
+    </div>
+
+    <!-- Try it section -->
+    <div id="download" style="margin-top:64px;background:#fff;border-radius:24px;padding:48px;display:grid;grid-template-columns:1fr auto;gap:48px;align-items:center;border:1px solid var(--gray-200);box-shadow:0 8px 32px rgba(0,0,0,.06);" class="fade-up">
+      <div>
+        <span class="tag tag-bezl" style="margin-bottom:16px;display:inline-block;">Try Bezl Now</span>
+        <h3 style="font-size:1.6rem;font-weight:800;margin-bottom:12px;">Experience Bezl for yourself</h3>
+        <p style="color:var(--text-muted);line-height:1.75;margin-bottom:28px;">Download the app on iOS or scan the QR code to try a live Bezl frame right in your browser — no download needed.</p>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;">
+          <a href="https://apps.apple.com/us/app/bezl/id6763313319" target="_blank" rel="noopener"
+             style="display:inline-flex;align-items:center;gap:10px;background:#000;color:#fff;padding:12px 22px;border-radius:12px;font-weight:600;font-size:.9rem;text-decoration:none;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+            Download on App Store
+          </a>
+          <a href="https://web.bezlapp.com/f/9CFC8522-7595-4286-879A-A06546642D53" target="_blank" rel="noopener"
+             class="btn btn-bezl-outline" style="border-radius:12px;padding:12px 22px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+            Try on Web
+          </a>
+        </div>
+      </div>
+      <div style="text-align:center;flex-shrink:0;">
+        <img
+          src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://web.bezlapp.com/f/9CFC8522-7595-4286-879A-A06546642D53&margin=8&color=5b4bdb&bgcolor=ffffff"
+          alt="Scan to try Bezl"
+          style="width:160px;height:160px;border-radius:16px;border:2px solid var(--gray-200);display:block;"
+        />
+        <p style="font-size:.78rem;color:var(--text-muted);margin-top:8px;font-weight:500;">Scan to try in browser</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA BANNER ── -->
+<div class="cta-banner">
+  <div class="container" style="position:relative;z-index:1;">
+    <span class="tag" style="background:rgba(255,255,255,.18);color:#fff;margin-bottom:20px;display:inline-block;">Ready to get started?</span>
+    <h2>Ready to frame<br/>your memories?</h2>
+    <p>Download Bezl and start framing your photos in seconds.</p>
+    <div class="cta-banner-buttons">
+      <a href="https://apps.apple.com/us/app/bezl/id6763313319" target="_blank" rel="noopener" class="btn btn-white">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        Download on App Store
+      </a>
+      <a href="https://web.bezlapp.com/f/9CFC8522-7595-4286-879A-A06546642D53" target="_blank" rel="noopener" class="btn btn-outline-white">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/></svg>
+        Try on Web
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <svg viewBox="0 0 1486.16 937.89" xmlns="http://www.w3.org/2000/svg" style="height:44px;width:auto;">
+            <defs><style>.fc1{fill:#5A43FE}</style></defs>
+            <path style="fill:#fff" d="M929.66,358.85h-147v112h126v87.5h-126v115.5h147v87.5h-245v-490h245v87.5Z"/>
+            <path style="fill:#fff" d="M1223.66,323.85l-141.4,350h141.4v87.5h-255.5v-52.5l141.4-350h-141.4v-87.5h255.5v52.5Z"/>
+            <path style="fill:#fff" d="M1360.16,673.85h126v87.5h-224v-490h98v402.5Z"/>
+            <path class="fc1" d="M832.27,201.87c0,14-5.54,29.52-16.62,46.58-11.08,17.06-25.3,34.26-42.64,51.61-17.35,17.35-36.67,34.26-57.95,50.73-21.29,16.48-42.28,31.27-62.98,44.39-17.21,10.79-33.75,20.63-49.64,29.52-15.9,8.9-30.76,17.28-44.61,25.15-13.85,7.87-26.46,15.38-37.83,22.52-11.37,7.15-21.29,14.36-29.74,21.65,20.99,3.79,39.65,7.51,55.98,11.15,16.33,3.65,29.3,7.95,38.92,12.9,7,4.96,14.14,12.32,21.43,22.09,7.28,9.77,13.84,19.76,19.68,29.96,5.83,10.21,10.56,19.46,14.21,27.77,3.64,8.31,5.47,13.34,5.47,15.09,0,12.83-3.28,26.39-9.84,40.67-6.56,14.29-15.6,28.5-27.12,42.64-11.52,14.15-25.22,27.77-41.11,40.89-15.9,13.12-33.24,25-52.04,35.64-18.81,10.64-38.71,19.68-59.7,27.12-20.99,7.43-42.28,12.31-63.85,14.65-9.62-7.87-18.96-16.26-27.99-25.15-9.04-8.9-17.21-17.21-24.49-24.93-7.29-7.72-13.41-14.43-18.37-20.12-4.96-5.69-8.02-9.25-9.18-10.71-10.5,16.33-21.14,31.2-31.93,44.61-10.79,13.41-21.5,24.71-32.14,33.89-10.65,9.18-21.29,16.18-31.93,20.99-10.65,4.81-21.21,6.92-31.71,6.34-4.37-.29-8.89-1.97-13.56-5.03-4.66-3.06-9.18-6.93-13.56-11.59-4.37-4.67-8.53-9.77-12.46-15.31-3.94-5.54-7.43-10.86-10.5-15.96-3.06-5.1-5.47-9.77-7.22-14-1.75-4.23-2.62-7.22-2.62-8.97,0-30.61,6.49-64.73,19.46-102.34,12.98-37.61,30.69-76.54,53.14-116.77,22.45-40.24,48.98-80.54,79.6-120.93,30.61-40.38,63.56-78.65,98.84-114.8,11.66-41.99,21.14-82.8,28.43-122.46,7.28-39.65,11.22-75.95,11.81-108.9,19.24,10.21,34.69,20.19,46.36,29.96,11.66,9.77,20.84,18.44,27.55,26.02,7.58,9.04,13.12,17.64,16.62,25.8,1.75,5.25,2.62,12.68,2.62,22.3,0,1.75-.07,3.57-.22,5.47-.15,1.9-.37,3.87-.66,5.9,40.82-29.15,81.41-52.41,121.8-69.76,40.38-17.34,79.08-26.02,116.12-26.02,4.66,0,10.06,1.75,16.18,5.25,6.12,3.5,12.31,8.17,18.59,14,6.27,5.84,12.53,12.32,18.81,19.46,6.27,7.15,11.81,14.43,16.62,21.87,4.81,7.43,8.67,14.58,11.59,21.43,2.91,6.85,4.37,12.76,4.37,17.71Z"/>
+            <path class="fc1" d="M791.42,927.88c20.77-4.28,41.9-6.4,62.98-8.02,14.66-1.1,29.39-1.65,44.07-2.03,8.02-.32,15.34-5.86,17.95-13.44,1.25-3.38,1.12-7.02,1.26-10.59,1.23-31.63,3.44-63.36,9.71-94.47,4.3,20.77,6.43,41.9,8.05,62.98.79,10.5,1.28,20.99,1.66,31.49.33,5.6.15,11.28-1.5,16.69-4.65,15.84-20.17,27.53-36.71,27.39-.93.07-4.18-.08-5.13-.08-34.27-1.01-68.64-3.22-102.34-9.91h0Z"/>
+            <path class="fc1" d="M145.82,10.01c-20.77,4.28-41.9,6.4-62.98,8.02-14.66,1.1-29.39,1.65-44.07,2.03-8.02.32-15.34,5.86-17.95,13.44-1.25,3.38-1.12,7.02-1.26,10.59-1.23,31.63-3.44,63.36-9.71,94.47-4.3-20.77-6.43-41.9-8.05-62.98-.79-10.5-1.28-20.99-1.66-31.49-.33-5.6-.15-11.28,1.5-16.69C6.29,11.57,21.81-.12,38.34.02c.93-.07,4.18.08,5.13.08,34.27,1.01,68.64,3.22,102.34,9.91h0Z"/>
+            <path class="fc1" d="M145.82,927.88c-33.7,6.7-68.08,8.9-102.34,9.91-.97.03-4.2.11-5.13.08-16.54.14-32.05-11.55-36.71-27.39-1.65-5.4-1.82-11.09-1.5-16.68.38-10.5.87-20.99,1.66-31.49,1.62-21.08,3.75-42.21,8.05-62.98,6.27,31.11,8.48,62.84,9.71,94.47.14,3.56.02,7.21,1.26,10.59,2.61,7.58,9.92,13.12,17.95,13.44,14.68.39,29.41.94,44.07,2.03,21.08,1.63,42.21,3.74,62.98,8.02h0Z"/>
+            <path class="fc1" d="M791.45,10.01C825.16,3.31,859.53,1.11,893.79.1c.97-.03,4.2-.11,5.13-.08,16.54-.14,32.05,11.55,36.71,27.39,1.65,5.4,1.82,11.09,1.5,16.68-.38,10.5-.87,20.99-1.66,31.49-1.62,21.08-3.75,42.21-8.05,62.98-6.27-31.11-8.48-62.84-9.71-94.47-.14-3.56-.02-7.21-1.26-10.59-2.61-7.58-9.92-13.12-17.95-13.44-14.68-.39-29.41-.94-44.07-2.03-21.08-1.63-42.21-3.74-62.98-8.02h0Z"/>
+          </svg>
+        </div>
+        <p>A creative photo-framing app by FirstGuide Limited. Frame your memories and share what matters — with hundreds of beautiful templates.</p>
+        <div class="footer-socials">
+          <a href="#" class="social-btn" aria-label="Instagram">
+            <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+          </a>
+          <a href="#" class="social-btn" aria-label="Twitter">
+            <svg viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 01-3.14 1.53 4.48 4.48 0 00-7.86 3v1A10.66 10.66 0 013 4s-4 9 5 13a11.64 11.64 0 01-7 2c9 5 20 0 20-11.5a4.5 4.5 0 00-.08-.83A7.72 7.72 0 0023 3z"/></svg>
+          </a>
+          <a href="mailto:info@firstguide.co.uk" class="social-btn" aria-label="Email">
+            <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>App</h4>
+        <ul>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#app-screenshots">Screenshots</a></li>
+          <li><a href="#download">Download</a></li>
+          <li><a href="https://web.bezlapp.com/f/9CFC8522-7595-4286-879A-A06546642D53" target="_blank" rel="noopener">Try on Web ↗</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="https://firstguide.vercel.app" target="_blank" rel="noopener">FirstGuide Limited ↗</a></li>
+          <li><a href="https://firstguide.vercel.app/astrure.html" target="_blank" rel="noopener">Astrure FMS ↗</a></li>
+          <li><a href="mailto:info@firstguide.co.uk">info@firstguide.co.uk</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>&copy; 2025 FirstGuide Limited. All rights reserved.</span>
+      <div style="display:flex;gap:20px;">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 20);
+  });
+  if (window.scrollY > 20) navbar.classList.add('scrolled');
+
+  const hamburger = document.getElementById('hamburger');
+  const mobileNav = document.getElementById('mobileNav');
+  hamburger.addEventListener('click', () => {
+    mobileNav.classList.toggle('open');
+    const spans = hamburger.querySelectorAll('span');
+    if (mobileNav.classList.contains('open')) {
+      spans[0].style.transform = 'translateY(7px) rotate(45deg)';
+      spans[1].style.opacity = '0';
+      spans[2].style.transform = 'translateY(-7px) rotate(-45deg)';
+    } else {
+      spans.forEach(s => { s.style.transform = ''; s.style.opacity = ''; });
+    }
+  });
+  document.querySelectorAll('.mobile-link, .mobile-nav .btn').forEach(link => {
+    link.addEventListener('click', () => {
+      mobileNav.classList.remove('open');
+      hamburger.querySelectorAll('span').forEach(s => { s.style.transform = ''; s.style.opacity = ''; });
+    });
+  });
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        window.scrollTo({ top: target.offsetTop - 80, behavior: 'smooth' });
+      }
+    });
+  });
+</script>
 
 </body>
 </html>
