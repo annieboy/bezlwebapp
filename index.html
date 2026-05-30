@@ -90,6 +90,8 @@
     .nav-logo-white { display: block; }
     nav.scrolled .nav-logo-dark { display: block; }
     nav.scrolled .nav-logo-white { display: none; }
+    nav.scrolled .nav-tagline-dark { display: block !important; }
+    nav.scrolled .nav-tagline-white { display: none; }
     .nav-links { display: flex; align-items: center; gap: 36px; }
     .nav-links a { font-weight: 500; color: rgba(255,255,255,.92); font-size: .95rem; transition: color .2s; }
     .nav-links a:hover { color: #fff; }
@@ -323,11 +325,13 @@
 <!-- ── NAVIGATION ── -->
 <nav id="navbar">
   <div class="nav-inner">
-    <a href="#home" class="nav-logo">
+    <a href="#home" class="nav-logo" style="flex-direction:column;align-items:flex-start;gap:2px;">
       <!-- White wordmark — shown on hero (transparent nav) -->
       <img class="nav-logo-white" src="/White_FullWordmark.svg" alt="BEZL">
       <!-- Purple icon — shown after scrolling -->
       <img class="nav-logo-dark" src="/Purple_Icon.svg" alt="BEZL">
+      <span class="nav-tagline-white" style="font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.75);font-weight:500;line-height:1;">made for memorable moments</span>
+      <span class="nav-tagline-dark" style="font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(0,0,0,.4);font-weight:500;line-height:1;display:none;">made for memorable moments</span>
     </a>
 
     <div class="nav-links">
@@ -374,7 +378,6 @@
       <span>Now Available on iOS</span>
     </div>
     <h1>Frame memories.<br/>Share what matters.</h1>
-    <p style="font-size:.78rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.9);margin-bottom:20px;margin-top:-12px;">Made for memorable moments</p>
     <p class="hero-subtitle">
       A creative photo-framing app that turns your photos into beautifully framed moments. Browse hundreds of templates, edit, and share in seconds.
     </p>
